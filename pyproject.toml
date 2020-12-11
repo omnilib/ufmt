@@ -1,0 +1,35 @@
+[build-system]
+requires = ["flit_core >=3,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "ufmt"
+author = "John Reese"
+author-email = "john@noswap.com"
+description-file = "README.md"
+home-page = "https://github.com/omnilib/ufmt"
+requires = ["black", "usort"]
+requires-python = ">=3.6"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Version Control",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+
+[tool.flit.metadata.urls]
+Github = "https://github.com/omnilib/ufmt"
+
+[tool.flit.sdist]
+exclude = [
+    ".github/",
+]
+
+[tool.attribution]
+name = "attribution"
+package = "attribution"
+version_file = true
