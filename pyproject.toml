@@ -8,7 +8,7 @@ author = "John Reese"
 author-email = "john@noswap.com"
 description-file = "README.md"
 home-page = "https://github.com/omnilib/ufmt"
-requires = ["black", "usort"]
+requires = ["black>=20.8b0", "usort>=0.5.0"]
 requires-python = ">=3.6"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -23,6 +23,9 @@ classifiers = [
 
 [tool.flit.metadata.urls]
 Github = "https://github.com/omnilib/ufmt"
+
+[tool.flit.scripts]
+ufmt = "ufmt:main"
 
 [tool.flit.sdist]
 exclude = [
