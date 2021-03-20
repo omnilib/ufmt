@@ -37,3 +37,14 @@ name = "µfmt"
 package = "ufmt"
 version_file = true
 signed_tags = true
+
+[tool.coverage.run]
+branch = true
+include = ["ufmt/*"]
+omit = ["ufmt/tests/*"]
+
+[tool.coverage.report]
+fail_under = 25
+precision = 1
+show_missing = true
+skip_covered = true
