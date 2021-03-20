@@ -3,4 +3,4 @@ usort + black, in that order
 """
 
 __author__ = "John Reese"
-__version__ = "0"
+from .__version__ import __version__

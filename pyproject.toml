@@ -30,6 +30,7 @@ exclude = [
 ]
 
 [tool.attribution]
-name = "attribution"
-package = "attribution"
+name = "µfmt"
+package = "ufmt"
 version_file = true
+signed_tags = true
