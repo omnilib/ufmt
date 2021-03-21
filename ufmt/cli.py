@@ -14,7 +14,9 @@ from .core import ufmt_paths
 
 def init_logging(*, debug: bool = False) -> None:
     logging.basicConfig(
-        stream=sys.stderr, level=logging.DEBUG if debug else logging.INFO
+        stream=sys.stderr,
+        level=logging.DEBUG if debug else logging.INFO,
+        format="%(message)s" if not debug else "%(levelname)s %(name)s %(message)s",
     )
     logging.getLogger("blib2to3").setLevel(logging.WARNING)
 

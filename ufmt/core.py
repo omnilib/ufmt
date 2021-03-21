@@ -38,9 +38,9 @@ def ufmt_file(path: Path, dry_run: bool = False) -> bool:
         changed = True
 
         if dry_run:
-            LOG.info(f"{path} would be formatted")
+            LOG.info(f"Would format {path}")
         else:
-            LOG.debug(f"{path} formatted")
+            LOG.debug(f"Formatted {path}")
             with open(path, "w", encoding=encoding, newline=newline) as f:
                 f.write(dst_contents)
 
@@ -53,13 +53,13 @@ def ufmt_paths(paths: List[Path], dry_run: bool = False) -> bool:
     for path in paths:
         if path.is_dir():
             # TODO use black's version of walk?
-            LOG.debug(f"walking {path}")
+            LOG.debug(f"Walking {path}")
             files = walk(path, "*.py")
         else:
             files = [path]
 
         for src in files:
-            LOG.debug(f"{src} found")
+            LOG.debug(f"Found {src}")
             changed |= ufmt_file(src, dry_run=dry_run)
 
     return changed
