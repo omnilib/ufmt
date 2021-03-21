@@ -1,4 +1,4 @@
- SRCS:=ufmt
+SRCS:=ufmt
 
 .venv:
 	python -m venv .venv
@@ -17,14 +17,12 @@ release: lint test clean
 	flit publish
 
 format:
-	python -m usort format $(SRCS)
-	python -m black $(SRCS)
+	python -m ufmt format $(SRCS)
 
 lint:
 	python -m mypy $(SRCS)
 	python -m flake8 $(SRCS)
-	python -m usort check $(SRCS)
-	python -m black --check $(SRCS)
+	python -m ufmt check $(SRCS)
 
 test:
 	python -m coverage run -m $(SRCS).tests
