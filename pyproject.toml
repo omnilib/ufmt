@@ -25,7 +25,7 @@ classifiers = [
 Github = "https://github.com/omnilib/ufmt"
 
 [tool.flit.scripts]
-ufmt = "ufmt:main"
+ufmt = "ufmt.cli:main"
 
 [tool.flit.sdist]
 exclude = [
@@ -44,7 +44,7 @@ include = ["ufmt/*"]
 omit = ["ufmt/tests/*"]
 
 [tool.coverage.report]
-fail_under = 25
+fail_under = 90
 precision = 1
 show_missing = true
 skip_covered = true

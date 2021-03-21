@@ -1,4 +1,4 @@
 # Copyright 2021 John Reese
 # Licensed under the MIT license
 
-from .smoke import SmokeTest
+from .core import CoreTest
