@@ -3,6 +3,7 @@
 Safe, atomic formatting with [black][] and [µsort][]
 
 [![version](https://img.shields.io/pypi/v/ufmt.svg)](https://pypi.org/project/ufmt)
+[![documentation](https://readthedocs.org/projects/ufmt/badge/?version=latest)](https://ufmt.omnilib.dev)
 [![changelog](https://img.shields.io/badge/change-log-blue)](https://ufmt.omnilib.dev/en/latest/changelog.html)
 [![license](https://img.shields.io/pypi/l/ufmt.svg)](https://github.com/omnilib/ufmt/blob/master/LICENSE)
 [![build status](https://github.com/omnilib/ufmt/workflows/Build/badge.svg)](https://github.com/omnilib/ufmt/actions)
