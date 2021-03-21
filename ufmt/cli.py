@@ -9,6 +9,7 @@ from typing import List
 import click
 
 from .__version__ import __version__
+from .core import ufmt_paths
 
 
 def init_logging(*, debug: bool = False) -> None:
@@ -26,11 +27,14 @@ def main(debug: bool):
 
 
 @main.command()
+@click.pass_context
 @click.argument("names", type=click.Path(exists=True), nargs=-1, metavar="[PATH] ...")
-def check(names: List[str]):
+def check(ctx: click.Context, names: List[str]):
     """Check formatting of one or more paths"""
-    paths = [Path(name) for name in names] if names else [Path.cwd()]
-    print(f"{paths!r}")
+    paths = [Path(name) for name in names] if names else [Path(".")]
+    changed = ufmt_paths(paths, dry_run=True)
+    if changed:
+        ctx.exit(1)
 
 
 @main.command()
@@ -38,4 +42,4 @@ def check(names: List[str]):
 def format(names: List[str]):
     """Format one or more paths in place"""
     paths = [Path(name) for name in names] if names else [Path(".")]
-    print(f"{paths!r}")
+    ufmt_paths(paths)
