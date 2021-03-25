@@ -40,10 +40,16 @@ To format one or more files or directories in place:
 $ ufmt format <path> [<path> ...]
 ```
 
-To validate files are formatted correctly:
+To validate files are formatted correctly, like for CI workflows:
 
 ```shell-session
 $ ufmt check <path> [<path> ...]
+```
+
+To validate formatting and generate a diff of necessary changes:
+
+```shell-session
+$ ufmt diff <path> [<path> ...]
 ```
 
 
