@@ -69,6 +69,42 @@ class CliTest(TestCase):
             self.assertEqual(1, result.exit_code)
 
     @patch("ufmt.cli.ufmt_paths")
+    def test_diff(self, ufmt_mock):
+        runner = CliRunner()
+
+        with self.subTest("paths not exist"):
+            ufmt_mock.reset_mock()
+            result = runner.invoke(main, ["diff", "fake.py"])
+            ufmt_mock.assert_not_called()
+            self.assertEqual(2, result.exit_code)
+            self.assertRegex(result.output, "Path '.*' does not exist")
+
+        with self.subTest("no paths given"):
+            ufmt_mock.reset_mock()
+            ufmt_mock.return_value = False
+            result = runner.invoke(main, ["diff"])
+            ufmt_mock.assert_called_with([Path(".")], dry_run=True, diff=True)
+            self.assertEqual(0, result.exit_code)
+
+        with self.subTest("given paths formatted"):
+            ufmt_mock.reset_mock()
+            ufmt_mock.return_value = False
+            result = runner.invoke(main, ["diff", "bar.py", "foo/frob.py"])
+            ufmt_mock.assert_called_with(
+                [Path("bar.py"), Path("foo/frob.py")], dry_run=True, diff=True
+            )
+            self.assertEqual(0, result.exit_code)
+
+        with self.subTest("given paths unformatted"):
+            ufmt_mock.reset_mock()
+            ufmt_mock.return_value = True
+            result = runner.invoke(main, ["diff", "bar.py", "foo/frob.py"])
+            ufmt_mock.assert_called_with(
+                [Path("bar.py"), Path("foo/frob.py")], dry_run=True, diff=True
+            )
+            self.assertEqual(1, result.exit_code)
+
+    @patch("ufmt.cli.ufmt_paths")
     def test_format(self, ufmt_mock):
         runner = CliRunner()
 

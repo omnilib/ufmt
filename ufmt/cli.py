@@ -40,6 +40,17 @@ def check(ctx: click.Context, names: List[str]):
 
 
 @main.command()
+@click.pass_context
+@click.argument("names", type=click.Path(exists=True), nargs=-1, metavar="[PATH] ...")
+def diff(ctx: click.Context, names: List[str]):
+    """Generate diffs for any files that need formatting"""
+    paths = [Path(name) for name in names] if names else [Path(".")]
+    changed = ufmt_paths(paths, dry_run=True, diff=True)
+    if changed:
+        ctx.exit(1)
+
+
+@main.command()
 @click.argument("names", type=click.Path(exists=True), nargs=-1, metavar="[PATH] ...")
 def format(names: List[str]):
     """Format one or more paths in place"""

@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import List
 
 from black import decode_bytes, format_file_contents, Mode, NothingChanged
+from moreorless.click import echo_color_unified_diff
 from usort.config import Config
 from usort.sorting import usort_string
 from usort.util import walk
@@ -25,7 +26,7 @@ def ufmt_string(path: Path, content: str, config: Config) -> str:
     return content
 
 
-def ufmt_file(path: Path, dry_run: bool = False) -> bool:
+def ufmt_file(path: Path, dry_run: bool = False, diff: bool = False) -> bool:
     changed = False
     config = Config.find(path)
 
@@ -44,10 +45,13 @@ def ufmt_file(path: Path, dry_run: bool = False) -> bool:
             with open(path, "w", encoding=encoding, newline=newline) as f:
                 f.write(dst_contents)
 
+        if diff:
+            echo_color_unified_diff(src_contents, dst_contents, path.as_posix())
+
     return changed
 
 
-def ufmt_paths(paths: List[Path], dry_run: bool = False) -> bool:
+def ufmt_paths(paths: List[Path], dry_run: bool = False, diff: bool = False) -> bool:
     changed = False
 
     for path in paths:
@@ -60,6 +64,6 @@ def ufmt_paths(paths: List[Path], dry_run: bool = False) -> bool:
 
         for src in files:
             LOG.debug(f"Found {src}")
-            changed |= ufmt_file(src, dry_run=dry_run)
+            changed |= ufmt_file(src, dry_run=dry_run, diff=diff)
 
     return changed

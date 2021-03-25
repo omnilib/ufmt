@@ -68,7 +68,8 @@ class CoreTest(TestCase):
             result = ufmt.ufmt_string(Path("foo.py"), CORRECTLY_FORMATTED_CODE, config)
             self.assertEqual(CORRECTLY_FORMATTED_CODE, result)
 
-    def test_ufmt_file(self):
+    @patch("ufmt.core.echo_color_unified_diff")
+    def test_ufmt_file(self, echo_mock):
         with TemporaryDirectory() as td:
             td = Path(td)
             f = td / "foo.py"
@@ -78,11 +79,22 @@ class CoreTest(TestCase):
                 changed = ufmt.ufmt_file(f, dry_run=True)
                 self.assertTrue(changed)
                 self.assertEqual(POORLY_FORMATTED_CODE, f.read_text())
+                echo_mock.assert_not_called()
+
+            with self.subTest("with diff"):
+                changed = ufmt.ufmt_file(f, dry_run=True, diff=True)
+                self.assertTrue(changed)
+                self.assertEqual(POORLY_FORMATTED_CODE, f.read_text())
+                echo_mock.assert_called_with(
+                    POORLY_FORMATTED_CODE, CORRECTLY_FORMATTED_CODE, f.as_posix()
+                )
+                echo_mock.reset_mock()
 
             with self.subTest("for reals"):
                 changed = ufmt.ufmt_file(f)
                 self.assertTrue(changed)
                 self.assertEqual(CORRECTLY_FORMATTED_CODE, f.read_text())
+                echo_mock.assert_not_called()
 
             f.write_text(CORRECTLY_FORMATTED_CODE)
 
@@ -90,6 +102,7 @@ class CoreTest(TestCase):
                 changed = ufmt.ufmt_file(f)
                 self.assertFalse(changed)
                 self.assertEqual(CORRECTLY_FORMATTED_CODE, f.read_text())
+                echo_mock.assert_not_called()
 
     @patch("ufmt.core.ufmt_file")
     def test_ufmt_paths(self, file_mock):
@@ -110,8 +123,8 @@ class CoreTest(TestCase):
                 changed = ufmt.ufmt_paths([f1, f3], dry_run=True)
                 file_mock.assert_has_calls(
                     [
-                        call(f1, dry_run=True),
-                        call(f3, dry_run=True),
+                        call(f1, dry_run=True, diff=False),
+                        call(f3, dry_run=True, diff=False),
                     ],
                     any_order=True,
                 )
@@ -119,11 +132,11 @@ class CoreTest(TestCase):
                 file_mock.reset_mock()
 
             with self.subTest("subdir"):
-                changed = ufmt.ufmt_paths([sd])
+                changed = ufmt.ufmt_paths([sd], diff=True)
                 file_mock.assert_has_calls(
                     [
-                        call(f2, dry_run=False),
-                        call(f3, dry_run=False),
+                        call(f2, dry_run=False, diff=True),
+                        call(f3, dry_run=False, diff=True),
                     ],
                     any_order=True,
                 )
