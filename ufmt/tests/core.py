@@ -1,10 +1,11 @@
 # Copyright 2021 John Reese
 # Licensed under the MIT license
 
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
-from unittest.mock import patch, call
+from unittest.mock import patch, call, Mock
 
 from usort.config import Config
 
@@ -54,6 +55,7 @@ def func(arg: str = "default") -> bool:
 '''
 
 
+@patch("ufmt.core.EXECUTOR", ThreadPoolExecutor)
 class CoreTest(TestCase):
     maxDiff = None
 
@@ -68,46 +70,37 @@ class CoreTest(TestCase):
             result = ufmt.ufmt_string(Path("foo.py"), CORRECTLY_FORMATTED_CODE, config)
             self.assertEqual(CORRECTLY_FORMATTED_CODE, result)
 
-    @patch("ufmt.core.echo_color_unified_diff")
-    def test_ufmt_file(self, echo_mock):
+    def test_ufmt_file(self):
         with TemporaryDirectory() as td:
             td = Path(td)
             f = td / "foo.py"
             f.write_text(POORLY_FORMATTED_CODE)
 
             with self.subTest("dry run"):
-                changed = ufmt.ufmt_file(f, dry_run=True)
-                self.assertTrue(changed)
+                result = ufmt.ufmt_file(f, dry_run=True)
+                self.assertTrue(result.changed)
+                self.assertIsNone(result.diff)
                 self.assertEqual(POORLY_FORMATTED_CODE, f.read_text())
-                echo_mock.assert_not_called()
 
-            with self.subTest("with diff"):
-                changed = ufmt.ufmt_file(f, dry_run=True, diff=True)
-                self.assertTrue(changed)
+            with self.subTest("dry run with diff"):
+                result = ufmt.ufmt_file(f, dry_run=True, diff=True)
+                self.assertTrue(result.changed)
+                self.assertIsNotNone(result.diff)
                 self.assertEqual(POORLY_FORMATTED_CODE, f.read_text())
-                echo_mock.assert_called_with(
-                    POORLY_FORMATTED_CODE, CORRECTLY_FORMATTED_CODE, f.as_posix()
-                )
-                echo_mock.reset_mock()
 
             with self.subTest("for reals"):
-                changed = ufmt.ufmt_file(f)
-                self.assertTrue(changed)
+                result = ufmt.ufmt_file(f)
+                self.assertTrue(result.changed)
                 self.assertEqual(CORRECTLY_FORMATTED_CODE, f.read_text())
-                echo_mock.assert_not_called()
 
             f.write_text(CORRECTLY_FORMATTED_CODE)
 
             with self.subTest("already formatted"):
-                changed = ufmt.ufmt_file(f)
-                self.assertFalse(changed)
+                result = ufmt.ufmt_file(f)
+                self.assertFalse(result.changed)
                 self.assertEqual(CORRECTLY_FORMATTED_CODE, f.read_text())
-                echo_mock.assert_not_called()
 
-    @patch("ufmt.core.ufmt_file")
-    def test_ufmt_paths(self, file_mock):
-        file_mock.return_value = True
-
+    def test_ufmt_paths(self):
         with TemporaryDirectory() as td:
             td = Path(td)
             f1 = td / "bar.py"
@@ -119,26 +112,42 @@ class CoreTest(TestCase):
             for f in f1, f2, f3:
                 f.write_text(POORLY_FORMATTED_CODE)
 
-            with self.subTest("files"):
-                changed = ufmt.ufmt_paths([f1, f3], dry_run=True)
-                file_mock.assert_has_calls(
-                    [
-                        call(f1, dry_run=True, diff=False),
-                        call(f3, dry_run=True, diff=False),
-                    ],
-                    any_order=True,
-                )
-                self.assertTrue(changed)
-                file_mock.reset_mock()
+            file_wrapper = Mock(name="ufmt_file", wraps=ufmt.ufmt_file)
+            with patch("ufmt.core.ufmt_file", file_wrapper):
+                with self.subTest("files"):
+                    results = ufmt.ufmt_paths([f1, f3], dry_run=True)
+                    self.assertEqual(2, len(results))
+                    file_wrapper.assert_has_calls(
+                        [
+                            call(f1, dry_run=True, diff=False),
+                            call(f3, dry_run=True, diff=False),
+                        ],
+                        any_order=True,
+                    )
+                    self.assertTrue(all(r.changed for r in results))
+                    file_wrapper.reset_mock()
 
-            with self.subTest("subdir"):
-                changed = ufmt.ufmt_paths([sd], diff=True)
-                file_mock.assert_has_calls(
-                    [
-                        call(f2, dry_run=False, diff=True),
-                        call(f3, dry_run=False, diff=True),
-                    ],
-                    any_order=True,
-                )
-                self.assertTrue(changed)
-                file_mock.reset_mock()
+                with self.subTest("files with diff"):
+                    results = ufmt.ufmt_paths([f1, f3], dry_run=True, diff=True)
+                    self.assertEqual(2, len(results))
+                    file_wrapper.assert_has_calls(
+                        [
+                            call(f1, dry_run=True, diff=True),
+                            call(f3, dry_run=True, diff=True),
+                        ],
+                        any_order=True,
+                    )
+                    self.assertTrue(all(r.changed for r in results))
+                    file_wrapper.reset_mock()
+
+                with self.subTest("subdir"):
+                    results = ufmt.ufmt_paths([sd])
+                    file_wrapper.assert_has_calls(
+                        [
+                            call(f2, dry_run=False, diff=False),
+                            call(f3, dry_run=False, diff=False),
+                        ],
+                        any_order=True,
+                    )
+                    self.assertTrue(all(r.changed for r in results))
+                    file_wrapper.reset_mock()

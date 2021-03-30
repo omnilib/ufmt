@@ -2,16 +2,31 @@
 # Licensed under the MIT license
 
 import logging
+from concurrent.futures import ProcessPoolExecutor
+from dataclasses import dataclass
+from functools import partial
+from multiprocessing import get_context
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Set
 
 from black import decode_bytes, format_file_contents, Mode, NothingChanged
-from moreorless.click import echo_color_unified_diff
+from moreorless.click import unified_diff
 from usort.config import Config
 from usort.sorting import usort_string
 from usort.util import walk
 
 LOG = logging.getLogger(__name__)
+
+CONTEXT = get_context("spawn")
+EXECUTOR = ProcessPoolExecutor
+
+
+@dataclass
+class Result:
+    path: Path
+    changed: bool = False
+    written: bool = False
+    diff: Optional[str] = None
 
 
 def ufmt_string(path: Path, content: str, config: Config) -> str:
@@ -26,44 +41,48 @@ def ufmt_string(path: Path, content: str, config: Config) -> str:
     return content
 
 
-def ufmt_file(path: Path, dry_run: bool = False, diff: bool = False) -> bool:
-    changed = False
+def ufmt_file(path: Path, dry_run: bool = False, diff: bool = False) -> Result:
     config = Config.find(path)
+
+    LOG.debug(f"Checking {path}")
 
     with open(path, "rb") as buf:
         src_contents, encoding, newline = decode_bytes(buf.read())
 
     dst_contents = ufmt_string(path, src_contents, config)
 
-    if src_contents != dst_contents:
-        changed = True
+    result = Result(path)
 
-        if dry_run:
-            LOG.info(f"Would format {path}")
-        else:
+    if src_contents != dst_contents:
+        result.changed = True
+
+        if diff:
+            result.diff = unified_diff(src_contents, dst_contents, path.as_posix())
+
+        if not dry_run:
             LOG.debug(f"Formatted {path}")
             with open(path, "w", encoding=encoding, newline=newline) as f:
                 f.write(dst_contents)
+            result.written = True
 
-        if diff:
-            echo_color_unified_diff(src_contents, dst_contents, path.as_posix())
-
-    return changed
+    return result
 
 
-def ufmt_paths(paths: List[Path], dry_run: bool = False, diff: bool = False) -> bool:
-    changed = False
+def ufmt_paths(
+    paths: List[Path], dry_run: bool = False, diff: bool = False
+) -> List[Result]:
+    files: Set[Path] = set()
 
     for path in paths:
         if path.is_dir():
             # TODO use black's version of walk?
             LOG.debug(f"Walking {path}")
-            files = walk(path, "*.py")
+            files.update(walk(path, "*.py"))
         else:
-            files = [path]
+            files.add(path)
 
-        for src in files:
-            LOG.debug(f"Found {src}")
-            changed |= ufmt_file(src, dry_run=dry_run, diff=diff)
+    with EXECUTOR() as exe:
+        fn = partial(ufmt_file, dry_run=dry_run, diff=diff)
+        results = list(exe.map(fn, files))
 
-    return changed
+    return results
