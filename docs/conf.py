@@ -66,7 +66,7 @@ html_theme_options = {
     "fixed_sidebar": True,
     "badge_branch": "main",
     "github_button": False,
-    "github_user": "jreese",
+    "github_user": "omnilib",
     "github_repo": "ufmt",
     "show_powered_by": False,
     "sidebar_collapse": False,
