@@ -11,7 +11,7 @@ home-page = "https://ufmt.omnilib.dev"
 requires = ["black>=20.8b0", "usort>=0.5.0"]
 requires-python = ">=3.6"
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Topic :: Software Development :: Version Control",
