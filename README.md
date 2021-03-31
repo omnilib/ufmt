@@ -30,6 +30,18 @@ Install
 $ pip install ufmt
 ```
 
+If you want to prevent unexpected formatting changes that can break your CI workflow,
+make sure to pin your transitive dependencies–including black, µsort, and µfmt–to your
+preferred versions.
+
+If you use `requirements.txt`, this might look like:
+
+```text
+black==20.8b1
+ufmt==1.2
+usort==0.6.3
+```
+
 
 Usage
 -----
