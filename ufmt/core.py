@@ -1,7 +1,9 @@
 # Copyright 2021 John Reese, Tim Hatch
 # Licensed under the MIT license
 
+import inspect
 import logging
+import re
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from functools import partial
@@ -9,11 +11,25 @@ from multiprocessing import get_context
 from pathlib import Path
 from typing import List, Optional, Set
 
-from black import decode_bytes, format_file_contents, Mode, NothingChanged
+from black import (
+    DEFAULT_INCLUDES,
+    DEFAULT_EXCLUDES,
+    Mode,
+    NothingChanged,
+    Report,
+    decode_bytes,
+    find_project_root,
+    format_file_contents,
+    gen_python_files,
+    get_gitignore,
+)
 from moreorless.click import unified_diff
 from usort.config import Config
 from usort.sorting import usort_string
-from usort.util import walk
+
+BLACK_HAS_EXTEND_EXCLUDE = (
+    "extend_exclude" in inspect.signature(gen_python_files).parameters
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -73,13 +89,39 @@ def ufmt_paths(
 ) -> List[Result]:
     files: Set[Path] = set()
 
+    # This relies an awful lot on black's internals, which appears on track to
+    # change between 20.8b1 and 21.x.  If we're serious about path walking
+    # (especially reading config, etc) we should probably vendor the parts we
+    # care about.
+
+    report = Report()  # write-only
+    include = re.compile(DEFAULT_INCLUDES)
+    exclude = re.compile(DEFAULT_EXCLUDES)
+
+    root = find_project_root(str(x) for x in paths)
+    gitignore = get_gitignore(root)
+
     for path in paths:
-        if path.is_dir():
-            # TODO use black's version of walk?
-            LOG.debug(f"Walking {path}")
-            files.update(walk(path, "*.py"))
-        else:
+        if path.is_file():
             files.add(path)
+        elif path.is_dir():
+            kwargs = {
+                "paths": path.iterdir(),
+                "root": root,
+                "include": include,
+                "exclude": exclude,
+                "force_exclude": None,
+                "report": report,
+                "gitignore": gitignore,
+            }
+            if BLACK_HAS_EXTEND_EXCLUDE:  # pragma: no cover
+                # Grmbl, if they gave this a default of null there
+                # wouldn't be such shenanigans.
+                kwargs["extend_exclude"] = None
+
+            files.update(gen_python_files(**kwargs))
+        else:
+            raise ValueError(f"Listed path {path} is not a file or directory")
 
     with EXECUTOR() as exe:
         fn = partial(ufmt_file, dry_run=dry_run, diff=diff)

@@ -103,13 +103,19 @@ class CoreTest(TestCase):
     def test_ufmt_paths(self):
         with TemporaryDirectory() as td:
             td = Path(td)
+
+            (td / "pyproject.toml").write_text("")
+            (td / ".gitignore").write_text("version.py\n")
+
             f1 = td / "bar.py"
             sd = td / "foo"
+
             sd.mkdir()
             f2 = sd / "baz.py"
             f3 = sd / "frob.py"
+            f4 = sd / "version.py"
 
-            for f in f1, f2, f3:
+            for f in f1, f2, f3, f4:
                 f.write_text(POORLY_FORMATTED_CODE)
 
             file_wrapper = Mock(name="ufmt_file", wraps=ufmt.ufmt_file)
@@ -124,6 +130,7 @@ class CoreTest(TestCase):
                         ],
                         any_order=True,
                     )
+                    self.assertEqual(file_wrapper.call_count, 2)
                     self.assertTrue(all(r.changed for r in results))
                     file_wrapper.reset_mock()
 
@@ -137,6 +144,7 @@ class CoreTest(TestCase):
                         ],
                         any_order=True,
                     )
+                    self.assertEqual(file_wrapper.call_count, 2)
                     self.assertTrue(all(r.changed for r in results))
                     file_wrapper.reset_mock()
 
@@ -149,5 +157,12 @@ class CoreTest(TestCase):
                         ],
                         any_order=True,
                     )
+                    self.assertEqual(file_wrapper.call_count, 2)
                     self.assertTrue(all(r.changed for r in results))
                     file_wrapper.reset_mock()
+
+                with self.subTest("invalid"):
+                    with self.assertRaisesRegex(
+                        ValueError, "Listed path .*zzz is not a file or directory"
+                    ):
+                        ufmt.ufmt_paths([sd / "zzz"])
