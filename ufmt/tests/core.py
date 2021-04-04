@@ -55,7 +55,7 @@ def func(arg: str = "default") -> bool:
 '''
 
 
-@patch("ufmt.core.EXECUTOR", ThreadPoolExecutor)
+@patch("trailrunner.core.EXECUTOR", ThreadPoolExecutor)
 class CoreTest(TestCase):
     maxDiff = None
 

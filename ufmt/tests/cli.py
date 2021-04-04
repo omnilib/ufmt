@@ -14,7 +14,7 @@ from ufmt.cli import main, echo_results
 from ufmt.core import Result
 
 
-@patch("ufmt.core.EXECUTOR", ThreadPoolExecutor)
+@patch("trailrunner.core.EXECUTOR", ThreadPoolExecutor)
 class CliTest(TestCase):
     def setUp(self):
         self.cwd = os.getcwd()
