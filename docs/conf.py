@@ -62,7 +62,7 @@ master_doc = "index"
 #
 html_theme = "alabaster"
 html_theme_options = {
-    "description": "Automate changelogs and releases",
+    "description": "Safe, atomic code formatting and import sorting",
     "fixed_sidebar": True,
     "badge_branch": "main",
     "github_button": False,
