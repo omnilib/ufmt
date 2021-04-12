@@ -7,13 +7,13 @@ from dataclasses import dataclass
 from functools import partial
 from multiprocessing import get_context
 from pathlib import Path
-from typing import List, Optional, Set
+from typing import List, Optional
 
 from black import decode_bytes, format_file_contents, Mode, NothingChanged
 from moreorless.click import unified_diff
+from trailrunner import walk_and_run
 from usort.config import Config
 from usort.sorting import usort_string
-from usort.util import walk
 
 LOG = logging.getLogger(__name__)
 
@@ -71,18 +71,7 @@ def ufmt_file(path: Path, dry_run: bool = False, diff: bool = False) -> Result:
 def ufmt_paths(
     paths: List[Path], dry_run: bool = False, diff: bool = False
 ) -> List[Result]:
-    files: Set[Path] = set()
-
-    for path in paths:
-        if path.is_dir():
-            # TODO use black's version of walk?
-            LOG.debug(f"Walking {path}")
-            files.update(walk(path, "*.py"))
-        else:
-            files.add(path)
-
-    with EXECUTOR() as exe:
-        fn = partial(ufmt_file, dry_run=dry_run, diff=diff)
-        results = list(exe.map(fn, files))
+    fn = partial(ufmt_file, dry_run=dry_run, diff=diff)
+    results = list(walk_and_run(paths, fn).values())
 
     return results
