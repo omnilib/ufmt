@@ -1,6 +1,19 @@
 µfmt
 ====
 
+v1.2.1
+------
+
+Maintenance release
+
+* Improve performance on large repositories using trailrunner (#10)
+
+```
+$ git shortlog -s v1.2...v1.2.1
+     4	John Reese
+```
+
+
 v1.2
 ----
 
