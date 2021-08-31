@@ -16,6 +16,7 @@ from black import (
     NothingChanged,
     parse_pyproject_toml,
     find_pyproject_toml,
+    TargetVersion,
 )
 from moreorless.click import unified_diff
 from trailrunner import walk_and_run
@@ -60,7 +61,9 @@ def make_black_config(path: Path) -> Mode:
     config = parse_pyproject_toml(config_file)
 
     # manually patch options that do not have a 1-to-1 match in Mode arguments
-    config["target_versions"] = set(config.pop("target_version", []))
+    config["target_versions"] = {
+        TargetVersion[val.upper()] for val in config.pop("target_version", [])
+    }
     config["string_normalization"] = not config.pop("skip_string_normalization", False)
 
     names = {
