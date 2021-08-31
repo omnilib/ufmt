@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
-from unittest.mock import patch, call, Mock
+from unittest.mock import patch, call, Mock, sentinel
 
 from usort.config import Config
 
@@ -69,6 +69,41 @@ class CoreTest(TestCase):
         with self.subTest("unchanged"):
             result = ufmt.ufmt_string(Path("foo.py"), CORRECTLY_FORMATTED_CODE, config)
             self.assertEqual(CORRECTLY_FORMATTED_CODE, result)
+
+    def test_make_black_config(self):
+        pyproject_toml = sentinel.pyproject_toml
+        config = dict(
+            target_version=["3.6", "3.7"],
+            skip_string_normalization=True,
+            skip_magic_trailing_comma=True,
+            line_length=87,
+        )
+
+        with patch(
+            "ufmt.core.find_pyproject_toml",
+            return_value=pyproject_toml,
+        ):
+            with patch(
+                "ufmt.core.parse_pyproject_toml",
+                side_effect=lambda path_config: config.copy()
+                if path_config is pyproject_toml
+                else sentinel.DEFAULT,
+            ):
+                mode = ufmt.core.make_black_config(Path())
+
+                with self.subTest("target_versions"):
+                    self.assertEqual(
+                        mode.target_versions, set(config["target_version"])
+                    )
+
+                with self.subTest("string_normalization"):
+                    self.assertEqual(
+                        mode.string_normalization,
+                        not config["skip_string_normalization"],
+                    )
+
+                with self.subTest("line_length"):
+                    self.assertEqual(mode.line_length, config["line_length"])
 
     def test_ufmt_file(self):
         with TemporaryDirectory() as td:
