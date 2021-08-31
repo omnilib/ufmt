@@ -52,7 +52,7 @@ def ufmt_string(
     return content
 
 
-def _make_black_config(path: Path) -> Mode:
+def make_black_config(path: Path) -> Mode:
     config_file = find_pyproject_toml((str(path),))
     if not config_file:
         return Mode()
@@ -79,7 +79,7 @@ def _make_black_config(path: Path) -> Mode:
 
 def ufmt_file(path: Path, dry_run: bool = False, diff: bool = False) -> Result:
     usort_config = UsortConfig.find(path)
-    black_config = _make_black_config(path)
+    black_config = make_black_config(path)
 
     LOG.debug(f"Checking {path}")
 
