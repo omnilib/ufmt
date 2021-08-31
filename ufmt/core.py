@@ -61,12 +61,7 @@ def make_black_config(path: Path) -> Mode:
 
     # manually patch options that do not have a 1-to-1 match in Mode arguments
     config["target_versions"] = set(config.pop("target_version", []))
-    config["string_normalization"] = (
-        not config.pop("skip_string_normalization", False),
-    )
-    config["magic_trailing_comma"] = (
-        not config.pop("skip_magic_trailing_comma", False),
-    )
+    config["string_normalization"] = not config.pop("skip_string_normalization", False)
 
     names = {
         field.name
