@@ -22,7 +22,7 @@ format:
 lint:
 	python -m mypy $(SRCS)
 	python -m flake8 $(SRCS)
-	python -m ufmt check $(SRCS)
+	python -m ufmt diff $(SRCS)
 
 test:
 	python -m coverage run -m $(SRCS).tests
