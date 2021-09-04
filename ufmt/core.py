@@ -2,10 +2,8 @@
 # Licensed under the MIT license
 
 import logging
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from functools import partial
-from multiprocessing import get_context
 from pathlib import Path
 from typing import List, Optional
 
@@ -23,9 +21,6 @@ from usort.config import Config as UsortConfig
 from usort.sorting import usort_string
 
 LOG = logging.getLogger(__name__)
-
-CONTEXT = get_context("spawn")
-EXECUTOR = ProcessPoolExecutor
 
 
 @dataclass
