@@ -16,9 +16,11 @@ from black import (
     find_pyproject_toml,
 )
 from moreorless.click import unified_diff
-from trailrunner import walk_and_run
+from trailrunner import Trailrunner
 from usort.config import Config as UsortConfig
 from usort.sorting import usort_string
+
+from .config import ufmt_config
 
 LOG = logging.getLogger(__name__)
 
@@ -98,7 +100,13 @@ def ufmt_file(path: Path, dry_run: bool = False, diff: bool = False) -> Result:
 def ufmt_paths(
     paths: List[Path], dry_run: bool = False, diff: bool = False
 ) -> List[Result]:
+    all_paths: List[Path] = []
+    runner = Trailrunner()
+    for path in paths:
+        config = ufmt_config(path)
+        all_paths.extend(runner.walk(path, excludes=config.excludes))
+
     fn = partial(ufmt_file, dry_run=dry_run, diff=diff)
-    results = list(walk_and_run(paths, fn).values())
+    results = list(runner.run(all_paths, fn).values())
 
     return results
