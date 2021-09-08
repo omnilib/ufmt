@@ -8,13 +8,14 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import patch, call
 
+import trailrunner
 from click.testing import CliRunner
 
 from ufmt.cli import main, echo_results
 from ufmt.core import Result
 
 
-@patch("trailrunner.core.EXECUTOR", ThreadPoolExecutor)
+@patch.object(trailrunner.core.Trailrunner, "DEFAULT_EXECUTOR", ThreadPoolExecutor)
 class CliTest(TestCase):
     def setUp(self):
         self.cwd = os.getcwd()

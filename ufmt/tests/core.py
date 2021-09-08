@@ -7,9 +7,18 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import patch, call, Mock, sentinel
 
+import trailrunner
 from usort.config import Config
 
 import ufmt
+
+FAKE_CONFIG = """
+[tool.ufmt]
+excludes = [
+    "foo/frob/",
+    "__init__.py",
+]
+"""
 
 POORLY_FORMATTED_CODE = """\
 import click
@@ -55,7 +64,7 @@ def func(arg: str = "default") -> bool:
 '''
 
 
-@patch("trailrunner.core.EXECUTOR", ThreadPoolExecutor)
+@patch.object(trailrunner.core.Trailrunner, "DEFAULT_EXECUTOR", ThreadPoolExecutor)
 class CoreTest(TestCase):
     maxDiff = None
 
@@ -186,3 +195,33 @@ class CoreTest(TestCase):
                     )
                     self.assertTrue(all(r.changed for r in results))
                     file_wrapper.reset_mock()
+
+    def test_ufmt_paths_config(self):
+        with TemporaryDirectory() as td:
+            td = Path(td).resolve()
+            md = td / "foo"
+            md.mkdir()
+            f1 = md / "__init__.py"
+            f2 = md / "foo.py"
+            sd = md / "frob/"
+            sd.mkdir()
+            f3 = sd / "main.py"
+
+            for f in f1, f2, f3:
+                f.write_text(POORLY_FORMATTED_CODE)
+
+            pyproj = td / "pyproject.toml"
+            pyproj.write_text(FAKE_CONFIG)
+
+            file_wrapper = Mock(name="ufmt_file", wraps=ufmt.ufmt_file)
+            with patch("ufmt.core.ufmt_file", file_wrapper):
+                ufmt.ufmt_paths([td])
+                file_wrapper.assert_has_calls(
+                    [
+                        call(f2, dry_run=False, diff=False),
+                    ],
+                    any_order=True,
+                )
+                self.assertEqual(f1.read_text(), POORLY_FORMATTED_CODE)
+                self.assertEqual(f2.read_text(), CORRECTLY_FORMATTED_CODE)
+                self.assertEqual(f3.read_text(), POORLY_FORMATTED_CODE)
