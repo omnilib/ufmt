@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import patch, call, Mock
 
+import trailrunner
 from black import TargetVersion
 from usort.config import Config
 
@@ -69,7 +70,7 @@ def func(arg: str = "default") -> bool:
 '''
 
 
-@patch("trailrunner.core.EXECUTOR", ThreadPoolExecutor)
+@patch.object(trailrunner.core.Trailrunner, "DEFAULT_EXECUTOR", ThreadPoolExecutor)
 class CoreTest(TestCase):
     maxDiff = None
 
