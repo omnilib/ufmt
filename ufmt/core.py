@@ -2,10 +2,8 @@
 # Licensed under the MIT license
 
 import logging
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from functools import partial
-from multiprocessing import get_context
 from pathlib import Path
 from typing import List, Optional
 
@@ -19,14 +17,13 @@ from black import (
     TargetVersion,
 )
 from moreorless.click import unified_diff
-from trailrunner import walk_and_run
+from trailrunner import Trailrunner
 from usort.config import Config as UsortConfig
 from usort.sorting import usort_string
 
-LOG = logging.getLogger(__name__)
+from .config import ufmt_config
 
-CONTEXT = get_context("spawn")
-EXECUTOR = ProcessPoolExecutor
+LOG = logging.getLogger(__name__)
 
 
 @dataclass
@@ -106,7 +103,13 @@ def ufmt_file(path: Path, dry_run: bool = False, diff: bool = False) -> Result:
 def ufmt_paths(
     paths: List[Path], dry_run: bool = False, diff: bool = False
 ) -> List[Result]:
+    all_paths: List[Path] = []
+    runner = Trailrunner()
+    for path in paths:
+        config = ufmt_config(path)
+        all_paths.extend(runner.walk(path, excludes=config.excludes))
+
     fn = partial(ufmt_file, dry_run=dry_run, diff=diff)
-    results = list(walk_and_run(paths, fn).values())
+    results = list(runner.run(all_paths, fn).values())
 
     return results

@@ -22,7 +22,7 @@ format:
 lint:
 	python -m mypy $(SRCS)
 	python -m flake8 $(SRCS)
-	python -m ufmt check $(SRCS)
+	python -m ufmt diff $(SRCS)
 
 test:
 	python -m coverage run -m $(SRCS).tests
@@ -33,7 +33,7 @@ html: .venv README.md docs/*.rst docs/conf.py
 	source .venv/bin/activate && sphinx-build -b html docs html
 
 clean:
-	rm -rf build dist README MANIFEST *.egg-info .mypy_cache
+	rm -rf build dist html README MANIFEST *.egg-info .mypy_cache
 
 distclean: clean
 	rm -rf .venv
