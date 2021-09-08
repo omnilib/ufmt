@@ -1,0 +1,8 @@
+- id: ufmt
+  name: Format source files with µfmt
+  description: Safe, atomic formatting with black and µsort
+  language: python
+  types:
+    - python
+  entry: ufmt format
+  require_serial: true
