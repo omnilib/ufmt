@@ -18,6 +18,11 @@ excludes = [
     "foo/frob/",
     "__init__.py",
 ]
+
+[tool.black]
+target_version = ["py36", "py37"]
+skip_string_normalization = true
+line_length = 87
 """
 
 POORLY_FORMATTED_CODE = """\
@@ -64,19 +69,6 @@ def func(arg: str = "default") -> bool:
 '''
 
 
-def gen_pyproject_toml(**options):
-    def format(value):
-        if isinstance(value, bool):
-            return str(value).lower()
-        else:
-            return value
-
-    content = "[tool.black]\n\n"
-    for name, value in options.items():
-        content += f"{name} = {format(value)}\n"
-    return content
-
-
 @patch("trailrunner.core.EXECUTOR", ThreadPoolExecutor)
 class CoreTest(TestCase):
     maxDiff = None
@@ -93,17 +85,11 @@ class CoreTest(TestCase):
             self.assertEqual(CORRECTLY_FORMATTED_CODE, result)
 
     def test_black_config(self):
-        config = dict(
-            target_version=["py36", "py37"],
-            skip_string_normalization=True,
-            line_length=87,
-        )
-
         with TemporaryDirectory() as td:
             td = Path(td)
 
-            pyproject_toml = td / "pyproject.toml"
-            pyproject_toml.write_text(gen_pyproject_toml(**config))
+            pyproj = td / "pyproject.toml"
+            pyproj.write_text(FAKE_CONFIG)
 
             f = td / "foo.py"
             f.write_text(POORLY_FORMATTED_CODE)
@@ -116,17 +102,14 @@ class CoreTest(TestCase):
             with self.subTest("target_versions"):
                 self.assertEqual(
                     mode.target_versions,
-                    set(TargetVersion[val.upper()] for val in config["target_version"]),
+                    {TargetVersion["PY36"], TargetVersion["PY37"]},
                 )
 
             with self.subTest("string_normalization"):
-                self.assertEqual(
-                    mode.string_normalization,
-                    not config["skip_string_normalization"],
-                )
+                self.assertFalse(mode.string_normalization)
 
             with self.subTest("line_length"):
-                self.assertEqual(mode.line_length, config["line_length"])
+                self.assertEqual(mode.line_length, 87)
 
     def test_ufmt_file(self):
         with TemporaryDirectory() as td:
