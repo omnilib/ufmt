@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import patch, call, Mock
 
+import tomlkit
 import trailrunner
 from black import TargetVersion
 from usort.config import Config
@@ -19,11 +20,6 @@ excludes = [
     "foo/frob/",
     "__init__.py",
 ]
-
-[tool.black]
-target_version = ["py36", "py37"]
-skip_string_normalization = true
-line_length = 87
 """
 
 POORLY_FORMATTED_CODE = """\
@@ -86,11 +82,23 @@ class CoreTest(TestCase):
             self.assertEqual(CORRECTLY_FORMATTED_CODE, result)
 
     def test_black_config(self):
+        black_config = dict(
+            target_version=["py36", "py37"],
+            skip_string_normalization=True,
+            line_length=87,
+        )
+
+        doc = tomlkit.parse(FAKE_CONFIG)
+        black = tomlkit.table()
+        for key, value in black_config.items():
+            black[key] = value
+        doc["tool"].add("black", black)
+
         with TemporaryDirectory() as td:
             td = Path(td)
 
             pyproj = td / "pyproject.toml"
-            pyproj.write_text(FAKE_CONFIG)
+            pyproj.write_text(tomlkit.dumps(doc))
 
             f = td / "foo.py"
             f.write_text(POORLY_FORMATTED_CODE)
@@ -103,14 +111,20 @@ class CoreTest(TestCase):
             with self.subTest("target_versions"):
                 self.assertEqual(
                     mode.target_versions,
-                    {TargetVersion["PY36"], TargetVersion["PY37"]},
+                    {
+                        TargetVersion[item.upper()]
+                        for item in black_config["target_version"]
+                    },
                 )
 
             with self.subTest("string_normalization"):
-                self.assertFalse(mode.string_normalization)
+                self.assertIs(
+                    mode.string_normalization,
+                    not black_config["skip_string_normalization"],
+                )
 
             with self.subTest("line_length"):
-                self.assertEqual(mode.line_length, 87)
+                self.assertEqual(mode.line_length, black_config["line_length"])
 
     def test_ufmt_file(self):
         with TemporaryDirectory() as td:
