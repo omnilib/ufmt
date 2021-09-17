@@ -65,6 +65,31 @@ $ ufmt diff <path> [<path> ...]
 ```
 
 
+`pre-commit` hook
+-----------------
+
+µfmt provides a [`pre-commit`](https://pre-commit.com) hook. To format your diff before 
+every commit, add the following to your `.pre-commit-config.yaml` file:
+
+```yaml
+  - repo: https://github.com/omnilib/ufmt
+    rev: 1.3.0
+    hooks:
+      - id: ufmt
+```
+
+You can change the `rev` to any version `>= 1.3.0`. To pin `black` and `usort`, use the 
+`additional_dependencies` option:
+
+```yaml
+    hooks: 
+      - id: ufmt 
+        additional_dependencies: 
+          - black == 20.8b0 
+          - usort == 0.6.3
+```
+
+
 License
 -------
 
