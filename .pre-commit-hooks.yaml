@@ -4,5 +4,6 @@
   language: python
   types_or:
     - python
+    - pyi
   entry: ufmt format
   require_serial: true
