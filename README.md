@@ -65,10 +65,10 @@ $ ufmt diff <path> [<path> ...]
 ```
 
 
-`pre-commit` hook
+[pre-commit] hook
 -----------------
 
-µfmt provides a [pre-commit](https://pre-commit.com) hook. To format your diff before 
+µfmt provides a [pre-commit] hook. To format your diff before 
 every commit, add the following to your `.pre-commit-config.yaml` file:
 
 ```yaml
@@ -101,3 +101,4 @@ my code is from me and not from my employer. See the `LICENSE` file for details.
 
 [black]: https://black.readthedocs.io
 [µsort]: https://usort.readthedocs.io
+[pre-commit]: https://pre-commit.com
