@@ -68,7 +68,7 @@ $ ufmt diff <path> [<path> ...]
 `pre-commit` hook
 -----------------
 
-µfmt provides a [`pre-commit`](https://pre-commit.com) hook. To format your diff before 
+µfmt provides a [pre-commit](https://pre-commit.com) hook. To format your diff before 
 every commit, add the following to your `.pre-commit-config.yaml` file:
 
 ```yaml
