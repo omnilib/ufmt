@@ -1,11 +1,31 @@
 µfmt
 ====
 
+v1.3.0
+------
+
+Feature release
+
+* Added support for configurable list of excludes to supplement gitignore (#14)
+* Added ufmt project-level configuration support in pyproject.toml (#14)
+* Read and pass black's config when formatting sources (#11)
+* Added pre-commit hook definition for other projects to use (#15)
+* Added basic user guide to documentation
+* Upgrade to trailrunner 1.1.0
+
+```
+$ git shortlog -s v1.2.1...v1.3.0
+    14	John Reese
+    14	Philip Meier
+```
+
+
 v1.2.1
 ------
 
 Maintenance release
 
+* Add support for reading and obeying .gitignore in project root (#10)
 * Improve performance on large repositories using trailrunner (#10)
 
 ```
