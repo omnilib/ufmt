@@ -20,14 +20,13 @@ format:
 	python -m ufmt format $(SRCS)
 
 lint:
-	python -m mypy $(SRCS)
 	python -m flake8 $(SRCS)
 	python -m ufmt diff $(SRCS)
 
 test:
 	python -m coverage run -m $(SRCS).tests
 	python -m coverage report
-	python -m coverage html
+	python -m mypy --install-types --non-interactive $(SRCS)
 
 html: .venv README.md docs/*.rst docs/conf.py
 	source .venv/bin/activate && sphinx-build -b html docs html
