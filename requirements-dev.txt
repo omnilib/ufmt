@@ -4,7 +4,7 @@ codecov==2.1.11
 coverage==5.5
 flit==3.0.0
 flake8==3.9.0
-mypy==0.812
+mypy==0.910
 sphinx==4.2.0
 usort==0.6.2
 git+https://github.com/miyakogi/m2r@66f4a5a500cdd9fc59085106bff082c9cadafaf3
