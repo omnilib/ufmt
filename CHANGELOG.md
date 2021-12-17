@@ -1,6 +1,23 @@
 µfmt
 ====
 
+v1.3.1
+------
+
+Bugfix release
+
+* Fixed formatting for type stubs (#41, #42)
+* Fixed pre-commit hook example in readme (#40)
+* Updated dependencies
+
+```
+$ git shortlog -s v1.3.0...v1.3.1
+    11	John Reese
+     1	Mathieu Kniewallner
+    19	dependabot[bot]
+```
+
+
 v1.3.0
 ------
 
@@ -74,7 +91,8 @@ Initial release
 * Basic readme and sphinx docs
 
 ```
-$ git shortlog -s 245e1a1d2047842e60a76ebebfcb108d90786c57...v1.0
-     1	John Reese
+$ git shortlog -s v1.0
+    17	John Reese
+     1	Tim Hatch
 ```
 
