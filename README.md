@@ -37,9 +37,9 @@ preferred versions.
 If you use `requirements.txt`, this might look like:
 
 ```text
-black==20.8b1
-ufmt==1.2
-usort==0.6.3
+black==21.12b0
+ufmt==1.3.1
+usort==0.6.4
 ```
 
 
@@ -73,7 +73,7 @@ every commit, add the following to your `.pre-commit-config.yaml` file:
 
 ```yaml
   - repo: https://github.com/omnilib/ufmt
-    rev: v1.3.0
+    rev: v1.3.1
     hooks:
       - id: ufmt
 ```
@@ -85,8 +85,8 @@ You can change the `rev` to any version `>= 1.3.0`. To pin `black` and `usort`, 
     hooks: 
       - id: ufmt 
         additional_dependencies: 
-          - black == 20.8b0 
-          - usort == 0.6.3
+          - black == 21.12b0
+          - usort == 0.6.4
 ```
 
 
