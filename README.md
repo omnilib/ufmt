@@ -17,8 +17,8 @@ Safe, atomic formatting with [black][] and [µsort][]
 
 µfmt formats files in-memory, first with µsort and then with black, before writing any
 changes back to disk. This enables a combined, atomic step in CI/CD workflows for
-checking or formatting files, without any with conflict or intermediate changes between
-the import sorter and the code formatter.
+checking or formatting files, without any chance of conflict or intermediate changes
+between the import sorter and the code formatter.
 
 
 Install
