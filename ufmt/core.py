@@ -41,9 +41,13 @@ def ufmt_string(
     black_config: Optional[Mode] = None,
 ) -> str:
     content = usort_string(content, usort_config, path)
+    mode = black_config or Mode()
+
+    if path.suffix == ".pyi":
+        mode.is_pyi = True
 
     try:
-        content = format_file_contents(content, fast=False, mode=black_config or Mode())
+        content = format_file_contents(content, fast=False, mode=mode)
     except NothingChanged:
         pass
 
