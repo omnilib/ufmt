@@ -10,7 +10,7 @@ import click
 from moreorless.click import echo_color_precomputed_diff
 
 from .__version__ import __version__
-from .core import ufmt_paths, Result
+from .core import Result, ufmt_paths
 
 
 def init_logging(*, debug: bool = False) -> None:

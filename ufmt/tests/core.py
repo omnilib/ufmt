@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
-from unittest.mock import patch, call, Mock
+from unittest.mock import call, Mock, patch
 
 import tomlkit
 import trailrunner

@@ -9,11 +9,11 @@ from typing import List, Optional
 
 from black import (
     decode_bytes,
+    find_pyproject_toml,
     format_file_contents,
     Mode,
     NothingChanged,
     parse_pyproject_toml,
-    find_pyproject_toml,
     TargetVersion,
 )
 from moreorless.click import unified_diff

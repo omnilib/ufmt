@@ -8,7 +8,7 @@ from unittest import TestCase
 
 from trailrunner.tests.core import cd
 
-from ufmt.config import UfmtConfig, ufmt_config
+from ufmt.config import ufmt_config, UfmtConfig
 
 
 class ConfigTest(TestCase):

@@ -6,12 +6,12 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
-from unittest.mock import patch, call
+from unittest.mock import call, patch
 
 import trailrunner
 from click.testing import CliRunner
 
-from ufmt.cli import main, echo_results
+from ufmt.cli import echo_results, main
 from ufmt.core import Result
 
 
