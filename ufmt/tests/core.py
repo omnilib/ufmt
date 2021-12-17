@@ -65,6 +65,33 @@ def func(arg: str = "default") -> bool:
     return arg == "default"
 '''
 
+POORLY_FORMATTED_STUB = """\
+import click
+import os
+
+def foo(a: int, b: str) -> bool:
+    ...
+
+class Bar:
+    def hello(
+        self,
+    ) -> None:
+        ...
+"""
+
+CORRECTLY_FORMATTED_STUB = """\
+import os
+
+import click
+
+def foo(a: int, b: str) -> bool: ...
+
+class Bar:
+    def hello(
+        self,
+    ) -> None: ...
+"""
+
 
 @patch.object(trailrunner.core.Trailrunner, "DEFAULT_EXECUTOR", ThreadPoolExecutor)
 class CoreTest(TestCase):
@@ -80,6 +107,10 @@ class CoreTest(TestCase):
         with self.subTest("unchanged"):
             result = ufmt.ufmt_string(Path("foo.py"), CORRECTLY_FORMATTED_CODE, config)
             self.assertEqual(CORRECTLY_FORMATTED_CODE, result)
+
+        with self.subTest("type stub"):
+            result = ufmt.ufmt_string(Path("foo.pyi"), POORLY_FORMATTED_STUB, config)
+            self.assertEqual(CORRECTLY_FORMATTED_STUB, result)
 
     def test_black_config(self):
         black_config = dict(
