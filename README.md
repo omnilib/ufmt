@@ -73,7 +73,7 @@ every commit, add the following to your `.pre-commit-config.yaml` file:
 
 ```yaml
   - repo: https://github.com/omnilib/ufmt
-    rev: 1.3.0
+    rev: v1.3.0
     hooks:
       - id: ufmt
 ```
