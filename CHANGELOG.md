@@ -1,6 +1,20 @@
 µfmt
 ====
 
+v1.3.2
+------
+
+Maintenance release
+
+- Disallow flit-core==3.7.0 in PEP 518 build (#56, pypa/flit#530)
+
+```
+$ git shortlog -s v1.3.1...v1.3.2
+     4	John Reese
+     7	dependabot[bot]
+```
+
+
 v1.3.1
 ------
 
