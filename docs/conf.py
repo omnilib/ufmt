@@ -73,6 +73,13 @@ html_theme_options = {
     "extra_nav_links": {
         "Report Issues": "https://github.com/omnilib/ufmt/issues",
     },
+    "font_family": "lato, Helvetica, sans-serif",
+    "code_font_family": (
+        "input-mono-narrow, 'Consolas', 'Menlo', 'DejaVu Sans Mono', "
+        "'Bitstream Vera Sans Mono', monospace"
+    ),
+    "head_font_family": "ff-tisa-web-pro, Georgia, serif",
+    "head_font_size": "280%",
 }
 
 html_sidebars = {

@@ -15,6 +15,10 @@ div.omnilib-badges a {
 }
 
 div.omnilib-badges a:hover {
-    color: #777;
+    color: #97F;
     border: none;
+}
+
+div.sphinxsidebarwrapper h1.logo a {
+    font-family: ff-tisa-web-pro, Georgia, serif;
 }
