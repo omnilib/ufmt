@@ -46,6 +46,7 @@ signed_tags = true
 
 [tool.coverage.run]
 branch = true
+parallel = true
 include = ["ufmt/*"]
 omit = ["ufmt/tests/*"]
 
@@ -54,3 +55,39 @@ fail_under = 100
 precision = 1
 show_missing = true
 skip_covered = true
+
+[tool.mypy]
+python_version = "3.7"
+# strict = true
+ignore_missing_imports = true
+
+[tool.thx]
+default = ["format", "docs", "test", "lint", "coverage"]
+module = "ufmt"
+srcs = "ufmt"
+python_versions = ["3.7", "3.8", "3.9", "3.10"]
+watch_paths = ["README.md", "docs", "ufmt"]
+
+[tool.thx.jobs]
+docs = {run="sphinx-build -ab html docs html", once=true}
+format = {run="python -m ufmt format {srcs}", once=true}
+test = "python -m coverage run -m {module}.tests"
+
+[tool.thx.jobs.combine]
+requires = ["test"]
+run = "python -m coverage combine"
+once = true
+
+[tool.thx.jobs.coverage]
+requires = ["combine"]
+run = "python -m coverage report"
+once = true
+show_output = true
+
+[tool.thx.jobs.lint]
+run = [
+    "python -m mypy --install-types --non-interactive -p {module}",
+    "python -m flake8 {srcs}",
+    "python -m ufmt check {srcs}",
+]
+parallel = true
