@@ -18,6 +18,7 @@ from .types import (
     BlackConfigFactory,
     Encoding,
     FileContent,
+    PostProcessor,
     Result,
     UsortConfig,
     UsortConfigFactory,
@@ -31,9 +32,10 @@ def ufmt_bytes(
     path: Path,
     content: FileContent,
     *,
+    encoding: Encoding = "utf-8",
     black_config: BlackConfig,
     usort_config: UsortConfig,
-    encoding: Encoding = "utf-8",
+    post_processor: Optional[PostProcessor] = None,
 ) -> FileContent:
     """
     Format arbitrary bytes for the given path.
@@ -56,10 +58,14 @@ def ufmt_bytes(
         content_str = result.output.decode(encoding)
         content_str = format_file_contents(content_str, fast=False, mode=black_config)
         content = content_str.encode(encoding)
-        return content
 
     except NothingChanged:
-        return result.output
+        content = result.output
+
+    if post_processor is not None:
+        content = post_processor(path, content, encoding=encoding)
+
+    return content
 
 
 def ufmt_string(
@@ -86,9 +92,9 @@ def ufmt_string(
     data = ufmt_bytes(
         path,
         data,
+        encoding=encoding,
         black_config=black_config,
         usort_config=usort_config,
-        encoding=encoding,
     )
     return data.decode(encoding)
 
@@ -100,6 +106,7 @@ def ufmt_file(
     diff: bool = False,
     black_config_factory: Optional[BlackConfigFactory] = None,
     usort_config_factory: Optional[UsortConfigFactory] = None,
+    post_processor: Optional[PostProcessor] = None,
 ) -> Result:
     """
     Format a single file on disk.
@@ -122,9 +129,10 @@ def ufmt_file(
     dst_contents = ufmt_bytes(
         path,
         src_contents,
+        encoding=encoding,
         black_config=black_config,
         usort_config=usort_config,
-        encoding=encoding,
+        post_processor=post_processor,
     )
 
     result = Result(path)
@@ -154,6 +162,7 @@ def ufmt_paths(
     diff: bool = False,
     black_config_factory: Optional[BlackConfigFactory] = None,
     usort_config_factory: Optional[UsortConfigFactory] = None,
+    post_processor: Optional[PostProcessor] = None,
 ) -> List[Result]:
     """
     Format one or more paths, recursively, ignoring any files excluded by configuration.
@@ -173,6 +182,7 @@ def ufmt_paths(
         diff=diff,
         black_config_factory=black_config_factory,
         usort_config_factory=usort_config_factory,
+        post_processor=post_processor,
     )
     results = list(runner.run(all_paths, fn).values())
 

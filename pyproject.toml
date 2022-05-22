@@ -13,6 +13,7 @@ requires = [
     "moreorless>=0.4.0",
     "tomlkit>=0.7.2",
     "trailrunner>=1.1.1",
+    "typing_extensions>=4.0",
     "usort>=0.5.0",
 ]
 requires-python = ">=3.6"

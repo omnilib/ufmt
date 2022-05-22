@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 from black import Mode as BlackConfig
+from typing_extensions import Protocol
 from usort import Config as UsortConfig
 
 Encoding = str
@@ -13,6 +14,17 @@ FileContent = bytes
 
 BlackConfigFactory = Callable[[Path], BlackConfig]
 UsortConfigFactory = Callable[[Path], UsortConfig]
+
+
+class PostProcessor(Protocol):
+    def __call__(
+        self,
+        path: Path,
+        content: FileContent,
+        *,
+        encoding: Encoding = "utf-8",
+    ) -> FileContent:  # pragma: nocover
+        ...
 
 
 @dataclass

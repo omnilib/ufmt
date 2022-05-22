@@ -10,7 +10,7 @@ from unittest.mock import call, Mock, patch
 import trailrunner
 
 import ufmt
-from ufmt.types import BlackConfig, UsortConfig
+from ufmt.types import BlackConfig, Encoding, UsortConfig
 
 FAKE_CONFIG = """
 [tool.ufmt]
@@ -126,6 +126,27 @@ class CoreTest(TestCase):
             )
             self.assertEqual(CORRECTLY_FORMATTED_STUB.encode(), result)
 
+    def test_ufmt_bytes_post_processor(self):
+        def post_processor(
+            path: Path, content: bytes, *, encoding: Encoding = "utf-8"
+        ) -> bytes:
+            return content + b"\nprint('hello')\n"
+
+        black_config = BlackConfig()
+        usort_config = UsortConfig()
+
+        result = ufmt.ufmt_bytes(
+            Path("foo.py"),
+            CORRECTLY_FORMATTED_CODE.encode(),
+            black_config=black_config,
+            usort_config=usort_config,
+            post_processor=post_processor,
+        )
+
+        self.assertEqual(
+            CORRECTLY_FORMATTED_CODE.encode() + b"\nprint('hello')\n", result
+        )
+
     def test_ufmt_string(self):
         black_config = BlackConfig()
         usort_config = UsortConfig()
@@ -212,6 +233,7 @@ class CoreTest(TestCase):
                                 diff=False,
                                 black_config_factory=None,
                                 usort_config_factory=None,
+                                post_processor=None,
                             ),
                             call(
                                 f3,
@@ -219,6 +241,7 @@ class CoreTest(TestCase):
                                 diff=False,
                                 black_config_factory=None,
                                 usort_config_factory=None,
+                                post_processor=None,
                             ),
                         ],
                         any_order=True,
@@ -237,6 +260,7 @@ class CoreTest(TestCase):
                                 diff=True,
                                 black_config_factory=None,
                                 usort_config_factory=None,
+                                post_processor=None,
                             ),
                             call(
                                 f3,
@@ -244,6 +268,7 @@ class CoreTest(TestCase):
                                 diff=True,
                                 black_config_factory=None,
                                 usort_config_factory=None,
+                                post_processor=None,
                             ),
                         ],
                         any_order=True,
@@ -261,6 +286,7 @@ class CoreTest(TestCase):
                                 diff=False,
                                 black_config_factory=None,
                                 usort_config_factory=None,
+                                post_processor=None,
                             ),
                             call(
                                 f3,
@@ -268,6 +294,7 @@ class CoreTest(TestCase):
                                 diff=False,
                                 black_config_factory=None,
                                 usort_config_factory=None,
+                                post_processor=None,
                             ),
                         ],
                         any_order=True,
@@ -303,6 +330,7 @@ class CoreTest(TestCase):
                             diff=False,
                             black_config_factory=None,
                             usort_config_factory=None,
+                            post_processor=None,
                         ),
                     ],
                     any_order=True,
