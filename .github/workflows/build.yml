@@ -26,11 +26,11 @@ jobs:
       - name: Install
         run: |
           pip install -U pip
-          pip install -U thx
+          pip install -Ur requirements-dev.txt
       - name: Test
-        run: thx --live test
+        run: make test
       - name: Lint
-        run: thx --live lint docs
+        run: make lint
 
   deps:
     runs-on: ${{ matrix.os }}
