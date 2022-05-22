@@ -90,6 +90,6 @@ show_output = true
 run = [
     "python -m mypy --install-types --non-interactive -p {module}",
     "python -m flake8 {srcs}",
-    "python -m ufmt check {srcs}",
+    "python -m ufmt diff {srcs}",
 ]
 parallel = true
