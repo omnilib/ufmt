@@ -44,7 +44,6 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 autodoc_default_options = {
-    "show-inheritance": True,
     "members": True,
     "undoc-members": True,
 }

@@ -7,12 +7,10 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import call, Mock, patch
 
-import tomlkit
 import trailrunner
-from black import TargetVersion
-from usort.config import Config
 
 import ufmt
+from ufmt.types import BlackConfig, UsortConfig
 
 FAKE_CONFIG = """
 [tool.ufmt]
@@ -97,65 +95,67 @@ class Bar:
 class CoreTest(TestCase):
     maxDiff = None
 
-    def test_ufmt_string(self):
-        config = Config()
+    def test_ufmt_bytes(self):
+        black_config = BlackConfig()
+        usort_config = UsortConfig()
 
         with self.subTest("changed"):
-            result = ufmt.ufmt_string(Path("foo.py"), POORLY_FORMATTED_CODE, config)
+            result = ufmt.ufmt_bytes(
+                Path("foo.py"),
+                POORLY_FORMATTED_CODE.encode(),
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
+
+        with self.subTest("unchanged"):
+            result = ufmt.ufmt_bytes(
+                Path("foo.py"),
+                CORRECTLY_FORMATTED_CODE.encode(),
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
+
+        with self.subTest("type stub"):
+            result = ufmt.ufmt_bytes(
+                Path("foo.pyi"),
+                POORLY_FORMATTED_STUB.encode(),
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_STUB.encode(), result)
+
+    def test_ufmt_string(self):
+        black_config = BlackConfig()
+        usort_config = UsortConfig()
+
+        with self.subTest("changed"):
+            result = ufmt.ufmt_string(
+                Path("foo.py"),
+                POORLY_FORMATTED_CODE,
+                black_config=black_config,
+                usort_config=usort_config,
+            )
             self.assertEqual(CORRECTLY_FORMATTED_CODE, result)
 
         with self.subTest("unchanged"):
-            result = ufmt.ufmt_string(Path("foo.py"), CORRECTLY_FORMATTED_CODE, config)
+            result = ufmt.ufmt_string(
+                Path("foo.py"),
+                CORRECTLY_FORMATTED_CODE,
+                black_config=black_config,
+                usort_config=usort_config,
+            )
             self.assertEqual(CORRECTLY_FORMATTED_CODE, result)
 
         with self.subTest("type stub"):
-            result = ufmt.ufmt_string(Path("foo.pyi"), POORLY_FORMATTED_STUB, config)
+            result = ufmt.ufmt_string(
+                Path("foo.pyi"),
+                POORLY_FORMATTED_STUB,
+                black_config=black_config,
+                usort_config=usort_config,
+            )
             self.assertEqual(CORRECTLY_FORMATTED_STUB, result)
-
-    def test_black_config(self):
-        black_config = dict(
-            target_version=["py36", "py37"],
-            skip_string_normalization=True,
-            line_length=87,
-        )
-
-        doc = tomlkit.parse(FAKE_CONFIG)
-        black = tomlkit.table()
-        for key, value in black_config.items():
-            black[key] = value
-        doc["tool"].add("black", black)
-
-        with TemporaryDirectory() as td:
-            td = Path(td)
-
-            pyproj = td / "pyproject.toml"
-            pyproj.write_text(tomlkit.dumps(doc))
-
-            f = td / "foo.py"
-            f.write_text(POORLY_FORMATTED_CODE)
-
-            result = ufmt.ufmt_file(f, dry_run=True)
-            self.assertTrue(result.changed)
-
-            mode = ufmt.core.make_black_config(td)
-
-            with self.subTest("target_versions"):
-                self.assertEqual(
-                    mode.target_versions,
-                    {
-                        TargetVersion[item.upper()]
-                        for item in black_config["target_version"]
-                    },
-                )
-
-            with self.subTest("string_normalization"):
-                self.assertIs(
-                    mode.string_normalization,
-                    not black_config["skip_string_normalization"],
-                )
-
-            with self.subTest("line_length"):
-                self.assertEqual(mode.line_length, black_config["line_length"])
 
     def test_ufmt_file(self):
         with TemporaryDirectory() as td:
@@ -206,8 +206,20 @@ class CoreTest(TestCase):
                     self.assertEqual(2, len(results))
                     file_wrapper.assert_has_calls(
                         [
-                            call(f1, dry_run=True, diff=False),
-                            call(f3, dry_run=True, diff=False),
+                            call(
+                                f1,
+                                dry_run=True,
+                                diff=False,
+                                black_config_factory=None,
+                                usort_config_factory=None,
+                            ),
+                            call(
+                                f3,
+                                dry_run=True,
+                                diff=False,
+                                black_config_factory=None,
+                                usort_config_factory=None,
+                            ),
                         ],
                         any_order=True,
                     )
@@ -219,8 +231,20 @@ class CoreTest(TestCase):
                     self.assertEqual(2, len(results))
                     file_wrapper.assert_has_calls(
                         [
-                            call(f1, dry_run=True, diff=True),
-                            call(f3, dry_run=True, diff=True),
+                            call(
+                                f1,
+                                dry_run=True,
+                                diff=True,
+                                black_config_factory=None,
+                                usort_config_factory=None,
+                            ),
+                            call(
+                                f3,
+                                dry_run=True,
+                                diff=True,
+                                black_config_factory=None,
+                                usort_config_factory=None,
+                            ),
                         ],
                         any_order=True,
                     )
@@ -231,8 +255,20 @@ class CoreTest(TestCase):
                     results = ufmt.ufmt_paths([sd])
                     file_wrapper.assert_has_calls(
                         [
-                            call(f2, dry_run=False, diff=False),
-                            call(f3, dry_run=False, diff=False),
+                            call(
+                                f2,
+                                dry_run=False,
+                                diff=False,
+                                black_config_factory=None,
+                                usort_config_factory=None,
+                            ),
+                            call(
+                                f3,
+                                dry_run=False,
+                                diff=False,
+                                black_config_factory=None,
+                                usort_config_factory=None,
+                            ),
                         ],
                         any_order=True,
                     )
@@ -261,7 +297,13 @@ class CoreTest(TestCase):
                 ufmt.ufmt_paths([td])
                 file_wrapper.assert_has_calls(
                     [
-                        call(f2, dry_run=False, diff=False),
+                        call(
+                            f2,
+                            dry_run=False,
+                            diff=False,
+                            black_config_factory=None,
+                            usort_config_factory=None,
+                        ),
                     ],
                     any_order=True,
                 )

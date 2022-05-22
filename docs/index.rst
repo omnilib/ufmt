@@ -5,6 +5,7 @@
     :maxdepth: 2
 
     guide
+    api
 
 .. toctree::
     :hidden:
