@@ -121,6 +121,7 @@ def ufmt_file(
     take a :class:`Path <pathlib.Path>` and return a :class:`BlackConfig` or
     :class:`UsortConfig` respectively.
     """
+    path = path.resolve()
     black_config = (black_config_factory or make_black_config)(path)
     usort_config = (usort_config_factory or UsortConfig.find)(path)
 
