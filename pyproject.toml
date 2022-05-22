@@ -69,6 +69,7 @@ python_versions = ["3.6", "3.7", "3.8", "3.9", "3.10"]
 watch_paths = ["README.md", "docs", "ufmt"]
 
 [tool.thx.jobs]
+deps = "python -m pessimist -c 'python -m {module}.tests' --fast ."
 docs = {run="sphinx-build -ab html docs html", once=true}
 format = {run="python -m ufmt format {srcs}", once=true}
 test = "python -m coverage run -m {module}.tests"

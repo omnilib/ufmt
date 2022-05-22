@@ -5,6 +5,7 @@ coverage==6.2
 flit==3.6.0
 flake8==4.0.1
 mypy==0.931
+pessimist==0.9.2
 sphinx==4.3.2
 sphinx-mdinclude==0.4.0b1
 usort==1.0.1
