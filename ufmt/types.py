@@ -24,11 +24,18 @@ class PostProcessor(Protocol):
         *,
         encoding: Encoding = "utf-8",
     ) -> FileContent:  # pragma: nocover
+        """
+        Process the bytes after formatting and return the final file content.
+        """
         ...
 
 
 @dataclass
 class Result:
+    """
+    Basic metadata results from formatting files.
+    """
+
     path: Path
     changed: bool = False
     written: bool = False

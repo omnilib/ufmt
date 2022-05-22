@@ -45,10 +45,23 @@ def ufmt_bytes(
     represents a type stub (has a ``.pyi`` suffix), the black config object will be
     updated to set ``is_pyi = True``.
 
-    Note: content will be decoded before passing to black, and re-encoded to bytes
-    again. Be sure to pass a known-valid unicode encoding for the content.
-    :func:`ufmt.util.read_file` can be used to both read bytes from disk, and make a
-    best guess at file encodings.
+    Optionally takes a post processor matching the :class:`PostProcessor` protocol.
+    If given, the post processor will be called with the updated byte string content
+    after it has been run through µsort and black. The return value of the post
+    processor will replace the final return value of :func:`ufmt_bytes`.
+
+    .. note::
+        Content will be decoded before passing to black, and re-encoded to bytes
+        again. Be sure to pass a known-valid unicode encoding for the content.
+
+        Specifying the correct encoding is important! µfmt cannot do the right thing
+        without the correct encoding if files contain PEP 263 coding lines, or byte
+        values unrepresentable in UTF-8 (like ``\\ud800``).
+
+        **When in doubt, use :func:`ufmt_file` or :func:`ufmt_paths`.**
+
+        :func:`ufmt.util.read_file` can be used to both read bytes from disk, and make a
+        best guess at file encodings. Otherwise, use :func:`tokenize.detect_encodings`.
     """
     result = usort(content, usort_config, path)
 
@@ -79,7 +92,15 @@ def ufmt_string(
     """
     Format an arbitrary string value for the given path.
 
-    DEPRECATED: will be removed in µfmt version 3.0. Use :func:`ufmt_bytes` instead.
+    .. warning::
+        Specifying the correct encoding is important! µfmt cannot do the right thing
+        without the correct encoding if files contain byte values unrepresentable
+        in UTF-8 (like ``\\ud800``) or PEP 263 coding lines.
+
+        When in doubt, use :func:`ufmt_file`.
+
+    .. deprecated:: 2.0
+        Will be removed in µfmt version 3.0. Use :func:`ufmt_bytes` instead.
     """
     warn(
         "ufmt_string will be removed in version 3.0; use ufmt_bytes instead",
@@ -110,16 +131,21 @@ def ufmt_file(
     post_processor: Optional[PostProcessor] = None,
 ) -> Result:
     """
-    Format a single file on disk.
+    Format a single file on disk, and returns a :class:`Result`.
 
     Passing ``dry_run = True`` will only format the file in memory, without writing
     changes to disk. Passing ``diff = True`` will generate a unified diff of changes
     on the :class:`Result` object.
 
-    Passing ``black_config_factory`` or ``usort_config_factory`` allows overriding the
-    default configuration for each respective tool. Must be pickleable functions that
-    take a :class:`Path <pathlib.Path>` and return a :class:`BlackConfig` or
-    :class:`UsortConfig` respectively.
+    Optionally takes ``black_config_factory`` or ``usort_config_factory`` to override
+    the default configuration detection for each respective tool. Factory functions
+    must take a :class:`pathlib.Path` object and return a valid :class:`BlackConfig`
+    or :class:`UsortConfig` object respectively.
+
+    Optionally takes a post processor matching the :class:`PostProcessor` protocol.
+    If given, the post processor will be called with the updated byte string content
+    after it has been run through µsort and black. The return value of the post
+    processor will replace the final return value of :func:`ufmt_bytes`.
     """
     path = path.resolve()
     black_config = (black_config_factory or make_black_config)(path)
@@ -170,7 +196,18 @@ def ufmt_paths(
     Format one or more paths, recursively, ignoring any files excluded by configuration.
 
     Uses trailrunner to first walk all paths, and then to run :func:`ufmt_file` on each
-    matching file found. All parameters are passed through to :func:`ufmt_file`.
+    matching file found. If more than one eligible file is discovered after walking the
+    given paths, all files will be formatted using a process pool for improved
+    performance and CPU utilization.
+
+    Returns a list of :class:`Result` objects for each file formatted.
+
+    See :func:`ufmt_file` for details on parameters, config factories,
+    and post processors. All parameters are passed through to :func:`ufmt_file`.
+
+    .. note::
+        Factory and post processing functions must be pickleable when using
+        :func:`ufmt_paths`.
     """
     all_paths: List[Path] = []
     runner = Trailrunner()

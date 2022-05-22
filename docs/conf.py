@@ -51,7 +51,11 @@ autodoc_member_order = "groupwise"
 autodoc_typehints = "description"
 
 highlight_language = "python3"
-intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "black": ("https://black.readthedocs.io/en/latest", None),
+    "usort": ("https://usort.readthedocs.io/en/latest", None),
+}
 master_doc = "index"
 
 # -- Options for HTML output -------------------------------------------------
