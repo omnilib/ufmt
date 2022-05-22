@@ -2,6 +2,7 @@
 # Licensed under the MIT license
 
 import logging
+from dataclasses import replace
 from functools import partial
 from pathlib import Path
 from typing import List, Optional
@@ -52,7 +53,7 @@ def ufmt_bytes(
     result = usort(content, usort_config, path)
 
     if path.suffix == ".pyi":
-        black_config.is_pyi = True
+        black_config = replace(black_config, is_pyi=True)
 
     try:
         content_str = result.output.decode(encoding)
