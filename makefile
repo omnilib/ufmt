@@ -36,7 +36,7 @@ test:
 	python -m coverage report
 
 deps:
-	python -m pessimist -c 'python -m $(SRCS).tests' --requirements= .
+	python -m pessimist -c 'python -m $(SRCS).tests' --requirements= --fast .
 
 html: .venv README.md docs/*.rst docs/conf.py
 	source $(ACTIVATE) && sphinx-build -b html docs html
