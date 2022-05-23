@@ -11,6 +11,7 @@ from usort import Config as UsortConfig
 
 Encoding = str
 FileContent = bytes
+Newline = bytes
 
 BlackConfigFactory = Callable[[Path], BlackConfig]
 UsortConfigFactory = Callable[[Path], UsortConfig]

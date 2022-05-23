@@ -201,12 +201,30 @@ class CoreTest(TestCase):
                 self.assertTrue(result.changed)
                 self.assertEqual(CORRECTLY_FORMATTED_CODE, f.read_text())
 
-            f.write_text(CORRECTLY_FORMATTED_CODE)
-
             with self.subTest("already formatted"):
+                f.write_text(CORRECTLY_FORMATTED_CODE)
+
                 result = ufmt.ufmt_file(f)
                 self.assertFalse(result.changed)
                 self.assertEqual(CORRECTLY_FORMATTED_CODE, f.read_text())
+
+            with self.subTest("already formatted, unix newlines"):
+                unix_content = CORRECTLY_FORMATTED_CODE.encode().replace(b"\r\n", b"\n")
+                f.write_bytes(unix_content)
+
+                result = ufmt.ufmt_file(f)
+                self.assertFalse(result.changed)
+                self.assertEqual(unix_content, f.read_bytes())
+
+            with self.subTest("already formatted, windows newlines"):
+                windows_content = CORRECTLY_FORMATTED_CODE.encode().replace(
+                    b"\n", b"\r\n"
+                )
+                f.write_bytes(windows_content)
+
+                result = ufmt.ufmt_file(f)
+                self.assertFalse(result.changed)
+                self.assertEqual(windows_content, f.read_bytes())
 
     def test_ufmt_paths(self):
         with TemporaryDirectory() as td:

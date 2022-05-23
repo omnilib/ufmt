@@ -153,7 +153,7 @@ def ufmt_file(
 
     LOG.debug(f"Checking {path}")
 
-    src_contents, encoding = read_file(path)
+    src_contents, encoding, newline = read_file(path)
     dst_contents = ufmt_bytes(
         path,
         src_contents,
@@ -177,7 +177,7 @@ def ufmt_file(
 
         if not dry_run:
             LOG.debug(f"Formatted {path}")
-            write_file(path, dst_contents)
+            write_file(path, dst_contents, newline=newline)
             result.written = True
 
     return result

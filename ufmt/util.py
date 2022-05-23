@@ -7,7 +7,7 @@ from typing import Tuple
 
 from black import find_pyproject_toml, parse_pyproject_toml, TargetVersion
 
-from .types import BlackConfig, Encoding, FileContent
+from .types import BlackConfig, Encoding, FileContent, Newline
 
 
 def make_black_config(path: Path) -> BlackConfig:
@@ -35,14 +35,18 @@ def make_black_config(path: Path) -> BlackConfig:
     return BlackConfig(**config)
 
 
-def read_file(path: Path) -> Tuple[FileContent, Encoding]:
+def read_file(path: Path) -> Tuple[FileContent, Encoding, Newline]:
     with open(path, "rb") as buf:
-        encoding, _ = tokenize.detect_encoding(buf.readline)
+        encoding, lines = tokenize.detect_encoding(buf.readline)
+        newline = b"\r\n" if lines[0].endswith(b"\r\n") else b"\n"
+
         buf.seek(0)
         content = buf.read()
-        return content, encoding
+        content = content.replace(newline, b"\n")
+        return content, encoding, newline
 
 
-def write_file(path: Path, content: FileContent) -> None:
+def write_file(path: Path, content: FileContent, newline: Newline) -> None:
+    content = content.replace(b"\n", newline)
     with open(path, "wb") as buf:
         buf.write(content)
