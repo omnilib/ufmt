@@ -1,6 +1,22 @@
 µfmt
 ====
 
+v1.3.3
+------
+
+Maintenance release
+
+- Adds PEP 561 py.typed marker to package
+- Exports core API in `__all__` for type checking
+- Updated example version pinnings in readme
+
+```
+$ git shortlog -s v1.3.2...v1.3.3
+    22	John Reese
+     6	dependabot[bot]
+```
+
+
 v1.3.2
 ------
 
