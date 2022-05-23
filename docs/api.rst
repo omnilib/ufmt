@@ -1,6 +1,17 @@
 API Reference
 =============
 
+.. module:: ufmt
+
+When integrating µfmt into an existing toolchain or workflow, it is highly recommended
+to use the simple, or high-level, API whenever possible. It is designed to provide easy
+mechanisms for customizing configuration and post-processing file content, while
+handling the boring parts of formatting large codebases, like file discovery, reading
+or writing bytes from disk, or managing workers processes to optimize performance.
+
+**When in doubt,** :func:`ufmt_paths` **should be the go-to method of using µfmt
+within other tools.**
+
 
 Simple API
 ----------
@@ -10,16 +21,6 @@ Simple API
 .. autofunction:: ufmt.ufmt_file
 
 .. autoclass:: ufmt.Result
-
-
-Advanced API
-------------
-
-.. autofunction:: ufmt.ufmt_bytes
-
-.. autoclass:: ufmt.Encoding
-
-.. autoclass:: ufmt.FileContent
 
 .. autoclass:: ufmt.BlackConfig
 
@@ -31,3 +32,19 @@ Advanced API
 
 .. autoclass:: ufmt.PostProcessor
     :special-members: __call__
+
+
+Low-level API
+-------------
+
+.. autoclass:: ufmt.Encoding
+
+.. autoclass:: ufmt.FileContent
+
+.. autoclass:: ufmt.Newline
+
+.. autofunction:: ufmt.ufmt_bytes
+
+.. autofunction:: ufmt.util.read_file
+
+.. autofunction:: ufmt.util.write_file

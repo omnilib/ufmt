@@ -40,7 +40,7 @@ deps:
 
 .PHONY: html
 html: .venv README.md docs/*.rst docs/conf.py
-	source $(ACTIVATE) && sphinx-build -b html docs html
+	source $(ACTIVATE) && sphinx-build -ab html docs html
 
 clean:
 	rm -rf build dist html README MANIFEST *.egg-info .mypy_cache
