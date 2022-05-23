@@ -1,6 +1,25 @@
 µfmt
 ====
 
+v2.0.0a1
+--------
+
+Alpha release
+
+- Feature: Refactor of core API for public usage (#66)
+- Feature: Support for passing black/usort config factories (#66)
+- Feature: Support for passing post-processor functions (#66)
+- Docs: New API reference added, covering high- and low-level API
+- Deprecated: `ufmt_string` will be removed in v3.0, use `ufmt_bytes`
+- Breaking change: `ufmt_file` and `ufmt_paths` require keyword arguments
+- Breaking change: Requires µsort >= 1.0
+
+```
+$ git shortlog -s v1.3.3...v2.0.0a1
+    14	John Reese
+```
+
+
 v1.3.3
 ------
 
