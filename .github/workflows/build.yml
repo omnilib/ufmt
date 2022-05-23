@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
         os: [macOS-latest, ubuntu-latest, windows-latest]
 
     steps:
@@ -50,6 +50,6 @@ jobs:
       - name: Install
         run: |
           pip install -U pip
-          pip install -U thx
+          pip install -Ur requirements-dev.txt
       - name: Deps
-        run: thx --live deps
+        run: make deps
