@@ -1,9 +1,14 @@
 SRCS:=ufmt
+ifeq ($(OS),Windows_NT)
+    ACTIVATE:=.venv/Scripts/activate
+else
+    ACTIVATE:=.venv/bin/activate
+endif
 
 .venv:
 	python -m venv .venv
-	source .venv/bin/activate && make setup dev
-	echo 'run `source .venv/bin/activate` to use virtualenv'
+	source $(ACTIVATE) && make setup dev
+	echo 'run `source $(ACTIVATE)` to use virtualenv'
 
 venv: .venv
 
@@ -34,7 +39,7 @@ deps:
 	python -m pessimist -c 'python -m $(SRCS).tests' --requirements= --fast .
 
 html: .venv README.md docs/*.rst docs/conf.py
-	source .venv/bin/activate && sphinx-build -b html docs html
+	source $(ACTIVATE) && sphinx-build -b html docs html
 
 clean:
 	rm -rf build dist html README MANIFEST *.egg-info .mypy_cache
