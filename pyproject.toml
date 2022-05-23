@@ -13,7 +13,8 @@ requires = [
     "moreorless>=0.4.0",
     "tomlkit>=0.7.2",
     "trailrunner>=1.1.1",
-    "usort>=0.5.0",
+    "typing_extensions>=4.0",
+    "usort>=1.0",
 ]
 requires-python = ">=3.6"
 classifiers = [
@@ -62,7 +63,7 @@ python_version = "3.7"
 ignore_missing_imports = true
 
 [tool.thx]
-default = ["format", "docs", "test", "lint", "coverage"]
+default = ["docs", "test", "lint", "coverage"]
 module = "ufmt"
 srcs = "ufmt"
 python_versions = ["3.6", "3.7", "3.8", "3.9", "3.10"]
@@ -89,6 +90,6 @@ show_output = true
 run = [
     "python -m mypy --install-types --non-interactive -p {module}",
     "python -m flake8 {srcs}",
-    "python -m ufmt check {srcs}",
+    "python -m ufmt diff {srcs}",
 ]
 parallel = true

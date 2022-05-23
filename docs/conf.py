@@ -44,15 +44,19 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 autodoc_default_options = {
-    "show-inheritance": True,
     "members": True,
     "undoc-members": True,
 }
 autodoc_member_order = "groupwise"
 autodoc_typehints = "description"
+autodoc_typehints_format = "short"
 
 highlight_language = "python3"
-intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "black": ("https://black.readthedocs.io/en/latest", None),
+    "usort": ("https://usort.readthedocs.io/en/latest", None),
+}
 master_doc = "index"
 
 # -- Options for HTML output -------------------------------------------------
