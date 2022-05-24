@@ -41,3 +41,4 @@ class Result:
     changed: bool = False
     written: bool = False
     diff: Optional[str] = None
+    error: Optional[Exception] = None

@@ -45,6 +45,10 @@ def ufmt_bytes(
     represents a type stub (has a ``.pyi`` suffix), the black config object will be
     updated to set ``is_pyi = True``.
 
+    This function will not catch any errors during formatting, except for "everything is
+    fine" messages, like :exc:`black.NothingChanged`. All other errors must be handled
+    by the code calling this function; see :func:`ufmt_file` for example error handling.
+
     Optionally takes a post processor matching the :class:`PostProcessor` protocol.
     If given, the post processor will be called with the updated byte string content
     after it has been run through µsort and black. The return value of the post
@@ -64,6 +68,8 @@ def ufmt_bytes(
         best guess at file encodings. Otherwise, use :func:`tokenize.detect_encodings`.
     """
     result = usort(content, usort_config, path)
+    if result.error:
+        raise result.error
 
     if path.suffix == ".pyi":
         black_config = replace(black_config, is_pyi=True)
@@ -137,6 +143,11 @@ def ufmt_file(
     changes to disk. Passing ``diff = True`` will generate a unified diff of changes
     on the :class:`Result` object.
 
+    Any errors that occur during formatting will be caught, and those exceptions will
+    be attached to the :attr:`Result.error` property of the result object. It is the
+    responsibility of code calling this function to check for errors in results and
+    handle or surface them appropriately.
+
     Optionally takes ``black_config_factory`` or ``usort_config_factory`` to override
     the default configuration detection for each respective tool. Factory functions
     must take a :class:`pathlib.Path` object and return a valid :class:`BlackConfig`
@@ -153,17 +164,21 @@ def ufmt_file(
 
     LOG.debug(f"Checking {path}")
 
-    src_contents, encoding, newline = read_file(path)
-    dst_contents = ufmt_bytes(
-        path,
-        src_contents,
-        encoding=encoding,
-        black_config=black_config,
-        usort_config=usort_config,
-        post_processor=post_processor,
-    )
-
     result = Result(path)
+
+    try:
+        src_contents, encoding, newline = read_file(path)
+        dst_contents = ufmt_bytes(
+            path,
+            src_contents,
+            encoding=encoding,
+            black_config=black_config,
+            usort_config=usort_config,
+            post_processor=post_processor,
+        )
+    except Exception as e:
+        result.error = e
+        return result
 
     if src_contents != dst_contents:
         result.changed = True
@@ -177,8 +192,11 @@ def ufmt_file(
 
         if not dry_run:
             LOG.debug(f"Formatted {path}")
-            write_file(path, dst_contents, newline=newline)
-            result.written = True
+            try:
+                write_file(path, dst_contents, newline=newline)
+                result.written = True
+            except Exception as e:
+                result.error = e
 
     return result
 
@@ -201,6 +219,10 @@ def ufmt_paths(
     performance and CPU utilization.
 
     Returns a list of :class:`Result` objects for each file formatted.
+    Any errors that occur during formatting will be caught, and those exceptions will
+    be attached to the :attr:`Result.error` property of the result object. It is the
+    responsibility of code calling this function to check for errors in results and
+    handle or surface them appropriately.
 
     See :func:`ufmt_file` for details on parameters, config factories,
     and post processors. All parameters are passed through to :func:`ufmt_file`.

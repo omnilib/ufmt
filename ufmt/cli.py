@@ -4,7 +4,7 @@
 import logging
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import click
 from moreorless.click import echo_color_precomputed_diff
@@ -22,10 +22,18 @@ def init_logging(*, debug: bool = False) -> None:
     logging.getLogger("blib2to3").setLevel(logging.WARNING)
 
 
-def echo_results(results: List[Result], diff: bool = False) -> bool:
+def echo_results(results: List[Result], diff: bool = False) -> Tuple[bool, bool]:
+    error = False
     changed = False
 
     for result in results:
+        if result.error is not None:
+            msg = str(result.error)
+            lines = msg.splitlines()
+            msg = lines[0]
+            click.secho(f"Error formatting {result.path}: {msg}", fg="yellow")
+            error = True
+
         if result.changed:
             changed = True
             if result.written:
@@ -35,7 +43,7 @@ def echo_results(results: List[Result], diff: bool = False) -> bool:
             if diff and result.diff:
                 echo_color_precomputed_diff(result.diff)
 
-    return changed
+    return changed, error
 
 
 @click.group()
@@ -52,8 +60,8 @@ def check(ctx: click.Context, names: List[str]):
     """Check formatting of one or more paths"""
     paths = [Path(name) for name in names] if names else [Path(".")]
     results = ufmt_paths(paths, dry_run=True)
-    changed = echo_results(results)
-    if changed:
+    changed, error = echo_results(results)
+    if changed or error:
         ctx.exit(1)
 
 
@@ -64,15 +72,18 @@ def diff(ctx: click.Context, names: List[str]):
     """Generate diffs for any files that need formatting"""
     paths = [Path(name) for name in names] if names else [Path(".")]
     results = ufmt_paths(paths, dry_run=True, diff=True)
-    changed = echo_results(results, diff=True)
-    if changed:
+    changed, error = echo_results(results, diff=True)
+    if changed or error:
         ctx.exit(1)
 
 
 @main.command()
+@click.pass_context
 @click.argument("names", type=click.Path(exists=True), nargs=-1, metavar="[PATH] ...")
-def format(names: List[str]):
+def format(ctx: click.Context, names: List[str]):
     """Format one or more paths in place"""
     paths = [Path(name) for name in names] if names else [Path(".")]
     results = ufmt_paths(paths)
-    echo_results(results)
+    _, error = echo_results(results)
+    if error:
+        ctx.exit(1)

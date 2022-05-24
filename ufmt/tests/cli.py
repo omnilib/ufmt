@@ -10,6 +10,7 @@ from unittest.mock import call, patch
 
 import trailrunner
 from click.testing import CliRunner
+from libcst import ParserSyntaxError
 
 from ufmt.cli import echo_results, main
 from ufmt.core import Result
@@ -119,6 +120,29 @@ class CliTest(TestCase):
             )
             self.assertEqual(1, result.exit_code)
 
+        with self.subTest("syntax error"):
+            ufmt_mock.reset_mock()
+            ufmt_mock.return_value = [
+                Result(Path("bar.py"), changed=False),
+                Result(
+                    Path("foo/frob.py"),
+                    error=ParserSyntaxError(
+                        "bad",
+                        lines=("", "", "", "foo bar fizzbuzz hello world"),
+                        raw_line=4,
+                        raw_column=15,
+                    ),
+                ),
+            ]
+            result = runner.invoke(main, ["check", "bar.py", "foo/frob.py"])
+            ufmt_mock.assert_called_with(
+                [Path("bar.py"), Path("foo/frob.py")], dry_run=True
+            )
+            self.assertRegex(
+                result.stdout, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
+            )
+            self.assertEqual(1, result.exit_code)
+
     @patch("ufmt.cli.ufmt_paths")
     def test_diff(self, ufmt_mock):
         runner = CliRunner()
@@ -161,6 +185,29 @@ class CliTest(TestCase):
             )
             self.assertEqual(1, result.exit_code)
 
+        with self.subTest("syntax error"):
+            ufmt_mock.reset_mock()
+            ufmt_mock.return_value = [
+                Result(Path("bar.py"), changed=False),
+                Result(
+                    Path("foo/frob.py"),
+                    error=ParserSyntaxError(
+                        "bad",
+                        lines=("", "", "", "foo bar fizzbuzz hello world"),
+                        raw_line=4,
+                        raw_column=15,
+                    ),
+                ),
+            ]
+            result = runner.invoke(main, ["diff", "bar.py", "foo/frob.py"])
+            ufmt_mock.assert_called_with(
+                [Path("bar.py"), Path("foo/frob.py")], dry_run=True, diff=True
+            )
+            self.assertRegex(
+                result.stdout, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
+            )
+            self.assertEqual(1, result.exit_code)
+
     @patch("ufmt.cli.ufmt_paths")
     def test_format(self, ufmt_mock):
         runner = CliRunner()
@@ -197,3 +244,24 @@ class CliTest(TestCase):
             result = runner.invoke(main, ["format", "bar.py", "foo/frob.py"])
             ufmt_mock.assert_called_with([Path("bar.py"), Path("foo/frob.py")])
             self.assertEqual(0, result.exit_code)
+
+        with self.subTest("syntax error"):
+            ufmt_mock.reset_mock()
+            ufmt_mock.return_value = [
+                Result(Path("bar.py"), changed=False),
+                Result(
+                    Path("foo/frob.py"),
+                    error=ParserSyntaxError(
+                        "bad",
+                        lines=("", "", "", "foo bar fizzbuzz hello world"),
+                        raw_line=4,
+                        raw_column=15,
+                    ),
+                ),
+            ]
+            result = runner.invoke(main, ["format", "bar.py", "foo/frob.py"])
+            ufmt_mock.assert_called_with([Path("bar.py"), Path("foo/frob.py")])
+            self.assertRegex(
+                result.stdout, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
+            )
+            self.assertEqual(1, result.exit_code)

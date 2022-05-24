@@ -8,6 +8,7 @@ from unittest import TestCase
 from unittest.mock import call, Mock, patch
 
 import trailrunner
+from libcst import ParserSyntaxError
 
 import ufmt
 from ufmt.types import BlackConfig, Encoding, UsortConfig
@@ -88,6 +89,10 @@ class Bar:
     def hello(
         self,
     ) -> None: ...
+"""
+
+INVALID_SYNTAX = """\
+print "hello world"
 """
 
 
@@ -225,6 +230,27 @@ class CoreTest(TestCase):
                 result = ufmt.ufmt_file(f)
                 self.assertFalse(result.changed)
                 self.assertEqual(windows_content, f.read_bytes())
+
+            with self.subTest("invalid syntax"):
+                f.write_text(INVALID_SYNTAX)
+
+                result = ufmt.ufmt_file(f)
+                self.assertIsInstance(result.error, ParserSyntaxError)
+
+            with self.subTest("file not found"):
+                f.unlink()
+
+                result = ufmt.ufmt_file(f)
+                self.assertIsInstance(result.error, FileNotFoundError)
+
+            with self.subTest("write failed"):
+                with patch("ufmt.core.write_file") as write_mock:
+                    write_mock.side_effect = PermissionError("fake permission error")
+
+                    f.write_text(POORLY_FORMATTED_CODE)
+
+                    result = ufmt.ufmt_file(f)
+                    self.assertIsInstance(result.error, PermissionError)
 
     def test_ufmt_paths(self):
         with TemporaryDirectory() as td:
