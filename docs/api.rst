@@ -30,7 +30,7 @@ Simple API
 
 .. autoclass:: ufmt.UsortConfigFactory
 
-.. autoclass:: ufmt.PostProcessor
+.. autoclass:: ufmt.Processor
     :special-members: __call__
 
 

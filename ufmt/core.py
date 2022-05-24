@@ -19,7 +19,7 @@ from .types import (
     BlackConfigFactory,
     Encoding,
     FileContent,
-    PostProcessor,
+    Processor,
     Result,
     UsortConfig,
     UsortConfigFactory,
@@ -36,7 +36,8 @@ def ufmt_bytes(
     encoding: Encoding = "utf-8",
     black_config: BlackConfig,
     usort_config: UsortConfig,
-    post_processor: Optional[PostProcessor] = None,
+    pre_processor: Optional[Processor] = None,
+    post_processor: Optional[Processor] = None,
 ) -> FileContent:
     """
     Format arbitrary bytes for the given path.
@@ -49,7 +50,10 @@ def ufmt_bytes(
     fine" messages, like :exc:`black.NothingChanged`. All other errors must be handled
     by the code calling this function; see :func:`ufmt_file` for example error handling.
 
-    Optionally takes a post processor matching the :class:`PostProcessor` protocol.
+    Optionally takes a pre- or post-processor matching the :class:`Processor` protocol.
+    If given, the pre-processor will be called with the original byte string content
+    before it has been run through µsort or black. The return value of the pre-processor
+    will be used in place of the original content when formatting.
     If given, the post processor will be called with the updated byte string content
     after it has been run through µsort and black. The return value of the post
     processor will replace the final return value of :func:`ufmt_bytes`.
@@ -67,6 +71,9 @@ def ufmt_bytes(
         :func:`ufmt.util.read_file` can be used to both read bytes from disk, and make a
         best guess at file encodings. Otherwise, use :func:`tokenize.detect_encodings`.
     """
+    if pre_processor is not None:
+        content = pre_processor(path, content, encoding=encoding)
+
     result = usort(content, usort_config, path)
     if result.error:
         raise result.error
@@ -134,7 +141,8 @@ def ufmt_file(
     diff: bool = False,
     black_config_factory: Optional[BlackConfigFactory] = None,
     usort_config_factory: Optional[UsortConfigFactory] = None,
-    post_processor: Optional[PostProcessor] = None,
+    pre_processor: Optional[Processor] = None,
+    post_processor: Optional[Processor] = None,
 ) -> Result:
     """
     Format a single file on disk, and returns a :class:`Result`.
@@ -153,7 +161,10 @@ def ufmt_file(
     must take a :class:`pathlib.Path` object and return a valid :class:`BlackConfig`
     or :class:`UsortConfig` object respectively.
 
-    Optionally takes a post processor matching the :class:`PostProcessor` protocol.
+    Optionally takes a pre- or post-processor matching the :class:`Processor` protocol.
+    If given, the pre-processor will be called with the original byte string content
+    before it has been run through µsort or black. The return value of the pre-processor
+    will be used in place of the original content when formatting.
     If given, the post processor will be called with the updated byte string content
     after it has been run through µsort and black. The return value of the post
     processor will replace the final return value of :func:`ufmt_bytes`.
@@ -174,6 +185,7 @@ def ufmt_file(
             encoding=encoding,
             black_config=black_config,
             usort_config=usort_config,
+            pre_processor=post_processor,
             post_processor=post_processor,
         )
     except Exception as e:
@@ -208,7 +220,8 @@ def ufmt_paths(
     diff: bool = False,
     black_config_factory: Optional[BlackConfigFactory] = None,
     usort_config_factory: Optional[UsortConfigFactory] = None,
-    post_processor: Optional[PostProcessor] = None,
+    pre_processor: Optional[Processor] = None,
+    post_processor: Optional[Processor] = None,
 ) -> List[Result]:
     """
     Format one or more paths, recursively, ignoring any files excluded by configuration.
@@ -243,6 +256,7 @@ def ufmt_paths(
         diff=diff,
         black_config_factory=black_config_factory,
         usort_config_factory=usort_config_factory,
+        pre_processor=pre_processor,
         post_processor=post_processor,
     )
     results = list(runner.run(all_paths, fn).values())
