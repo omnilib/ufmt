@@ -1,6 +1,21 @@
 µfmt
 ====
 
+v2.0.0a2
+--------
+
+Alpha release
+
+- Feature: added pre-processors to match post-processors (#72)
+- Feature: support for formatting via stdin (#71)
+- Fix: better error handling when formatting files (#68)
+
+```
+$ git shortlog -s v2.0.0a1...v2.0.0a2
+    15	John Reese
+```
+
+
 v2.0.0a1
 --------
 
