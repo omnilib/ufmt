@@ -139,7 +139,7 @@ class CliTest(TestCase):
                 [Path("bar.py"), Path("foo/frob.py")], dry_run=True
             )
             self.assertRegex(
-                result.stdout, r"Error formatting foo/frob\.py: Syntax Error @ 4:16"
+                result.stdout, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
             )
             self.assertEqual(1, result.exit_code)
 
@@ -204,7 +204,7 @@ class CliTest(TestCase):
                 [Path("bar.py"), Path("foo/frob.py")], dry_run=True, diff=True
             )
             self.assertRegex(
-                result.stdout, r"Error formatting foo/frob\.py: Syntax Error @ 4:16"
+                result.stdout, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
             )
             self.assertEqual(1, result.exit_code)
 
@@ -262,6 +262,6 @@ class CliTest(TestCase):
             result = runner.invoke(main, ["format", "bar.py", "foo/frob.py"])
             ufmt_mock.assert_called_with([Path("bar.py"), Path("foo/frob.py")])
             self.assertRegex(
-                result.stdout, r"Error formatting foo/frob\.py: Syntax Error @ 4:16"
+                result.stdout, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
             )
             self.assertEqual(1, result.exit_code)
