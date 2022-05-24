@@ -24,7 +24,7 @@ def init_logging(*, debug: bool = False) -> None:
 
 def echo_results(results: List[Result], diff: bool = False) -> Tuple[bool, bool]:
     if not results:
-        click.secho(f"No files found", fg="yellow", err=True)
+        click.secho("No files found", fg="yellow", err=True)
         return False, True
 
     error = False

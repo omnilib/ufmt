@@ -1,6 +1,7 @@
 # Copyright 2021 John Reese
 # Licensed under the MIT license
 
+import io
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -11,7 +12,8 @@ import trailrunner
 from libcst import ParserSyntaxError
 
 import ufmt
-from ufmt.types import BlackConfig, Encoding, UsortConfig
+from ufmt.core import ufmt_stdin
+from ufmt.types import BlackConfig, Encoding, Result, STDIN, UsortConfig
 
 FAKE_CONFIG = """
 [tool.ufmt]
@@ -273,6 +275,46 @@ class CoreTest(TestCase):
                     result = ufmt.ufmt_file(f)
                     self.assertIsInstance(result.error, PermissionError)
 
+    @patch("ufmt.core.sys.stdin")
+    @patch("ufmt.core.sys.stdout")
+    def test_ufmt_stdin(self, stdout_mock, stdin_mock):
+        with self.subTest("check"):
+            stdin_mock.buffer = stdin = io.BytesIO()
+            stdout_mock.buffer = stdout = io.BytesIO()
+
+            stdin.write(POORLY_FORMATTED_CODE.encode())
+            stdin.seek(0)
+
+            result = ufmt_stdin(STDIN, dry_run=True)
+            expected = Result(path=STDIN, changed=True)
+            self.assertEqual(expected, result)
+            stdout.seek(0)
+            self.assertEqual(b"", stdout.read())
+
+        with self.subTest("diff"):
+            stdin_mock.buffer = stdin = io.BytesIO()
+            stdout_mock.buffer = stdout = io.BytesIO()
+
+            stdin.write(POORLY_FORMATTED_CODE.encode())
+            stdin.seek(0)
+
+            result = ufmt_stdin(STDIN, dry_run=True, diff=True)
+            self.assertTrue(result.diff)
+            stdout.seek(0)
+            self.assertEqual(b"", stdout.read())
+
+        with self.subTest("format"):
+            stdin_mock.buffer = stdin = io.BytesIO()
+            stdout_mock.buffer = stdout = io.BytesIO()
+
+            stdin.write(POORLY_FORMATTED_CODE.encode())
+            stdin.seek(0)
+
+            result = ufmt_stdin(STDIN)
+            expected = Result(path=STDIN, changed=True, written=True)
+            stdout.seek(0)
+            self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), stdout.read())
+
     def test_ufmt_paths(self):
         with TemporaryDirectory() as td:
             td = Path(td)
@@ -287,6 +329,23 @@ class CoreTest(TestCase):
 
             file_wrapper = Mock(name="ufmt_file", wraps=ufmt.ufmt_file)
             with patch("ufmt.core.ufmt_file", file_wrapper):
+                with self.subTest("no paths"):
+                    results = ufmt.ufmt_paths([], dry_run=True)
+                    self.assertEqual([], results)
+                    file_wrapper.assert_not_called()
+
+                with self.subTest("non-existent paths"):
+                    results = ufmt.ufmt_paths(
+                        [(td / "fake.py"), (td / "another.py")], dry_run=True
+                    )
+                    self.assertEqual([], results)
+
+                with self.subTest("mixed paths with stdin"):
+                    with patch("ufmt.core.LOG") as log_mock:
+                        results = ufmt.ufmt_paths([f1, STDIN, f3], dry_run=True)
+                        self.assertEqual(2, len(results))
+                        log_mock.warning.assert_called_once()
+
                 with self.subTest("files"):
                     results = ufmt.ufmt_paths([f1, f3], dry_run=True)
                     self.assertEqual(2, len(results))
@@ -372,6 +431,38 @@ class CoreTest(TestCase):
                     )
                     self.assertTrue(all(r.changed for r in results))
                     file_wrapper.reset_mock()
+
+    @patch("ufmt.core.ufmt_stdin")
+    def test_ufmt_paths_stdin(self, stdin_mock):
+        stdin_mock.return_value = Result(path=STDIN, changed=True)
+
+        with self.subTest("no name"):
+            ufmt.ufmt_paths([STDIN], dry_run=True)
+            stdin_mock.assert_called_with(
+                Path("<stdin>"),
+                dry_run=True,
+                diff=False,
+                black_config_factory=None,
+                usort_config_factory=None,
+                pre_processor=None,
+                post_processor=None,
+            )
+
+        with self.subTest("path name"):
+            ufmt.ufmt_paths([STDIN, Path("hello.py")], dry_run=True)
+            stdin_mock.assert_called_with(
+                Path("hello.py"),
+                dry_run=True,
+                diff=False,
+                black_config_factory=None,
+                usort_config_factory=None,
+                pre_processor=None,
+                post_processor=None,
+            )
+
+        with self.subTest("extra args"):
+            with self.assertRaisesRegex(ValueError, "too many stdin paths"):
+                ufmt.ufmt_paths([STDIN, Path("hello.py"), Path("foo.py")], dry_run=True)
 
     def test_ufmt_paths_config(self):
         with TemporaryDirectory() as td:
