@@ -2,10 +2,11 @@
 # Licensed under the MIT license
 
 import os
+import platform
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest import TestCase
+from unittest import skipIf, TestCase
 from unittest.mock import call, patch
 
 import trailrunner
@@ -251,6 +252,7 @@ class CliTest(TestCase):
             )
             self.assertEqual(1, result.exit_code)
 
+    @skipIf(platform.system() == "Windows", "stderr not supported on Windows")
     def test_stdin(self) -> None:
         runner = CliRunner(mix_stderr=False)
 
