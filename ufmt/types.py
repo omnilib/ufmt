@@ -17,7 +17,7 @@ BlackConfigFactory = Callable[[Path], BlackConfig]
 UsortConfigFactory = Callable[[Path], UsortConfig]
 
 
-class PostProcessor(Protocol):
+class Processor(Protocol):
     def __call__(
         self,
         path: Path,
@@ -26,7 +26,7 @@ class PostProcessor(Protocol):
         encoding: Encoding = "utf-8",
     ) -> FileContent:  # pragma: nocover
         """
-        Process the bytes after formatting and return the final file content.
+        Process bytes before or after formatting and return the updated file content.
         """
         ...
 
