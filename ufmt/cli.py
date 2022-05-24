@@ -23,6 +23,10 @@ def init_logging(*, debug: bool = False) -> None:
 
 
 def echo_results(results: List[Result], diff: bool = False) -> Tuple[bool, bool]:
+    if not results:
+        click.secho("No files found", fg="yellow", err=True)
+        return False, True
+
     error = False
     changed = False
 
@@ -31,15 +35,15 @@ def echo_results(results: List[Result], diff: bool = False) -> Tuple[bool, bool]
             msg = str(result.error)
             lines = msg.splitlines()
             msg = lines[0]
-            click.secho(f"Error formatting {result.path}: {msg}", fg="yellow")
+            click.secho(f"Error formatting {result.path}: {msg}", fg="yellow", err=True)
             error = True
 
         if result.changed:
             changed = True
             if result.written:
-                click.echo(f"Formatted {result.path}")
+                click.echo(f"Formatted {result.path}", err=True)
             else:
-                click.echo(f"Would format {result.path}")
+                click.echo(f"Would format {result.path}", err=True)
             if diff and result.diff:
                 echo_color_precomputed_diff(result.diff)
 
@@ -55,7 +59,9 @@ def main(debug: bool):
 
 @main.command()
 @click.pass_context
-@click.argument("names", type=click.Path(exists=True), nargs=-1, metavar="[PATH] ...")
+@click.argument(
+    "names", type=click.Path(allow_dash=True), nargs=-1, metavar="[PATH] ..."
+)
 def check(ctx: click.Context, names: List[str]):
     """Check formatting of one or more paths"""
     paths = [Path(name) for name in names] if names else [Path(".")]
@@ -67,7 +73,9 @@ def check(ctx: click.Context, names: List[str]):
 
 @main.command()
 @click.pass_context
-@click.argument("names", type=click.Path(exists=True), nargs=-1, metavar="[PATH] ...")
+@click.argument(
+    "names", type=click.Path(allow_dash=True), nargs=-1, metavar="[PATH] ..."
+)
 def diff(ctx: click.Context, names: List[str]):
     """Generate diffs for any files that need formatting"""
     paths = [Path(name) for name in names] if names else [Path(".")]
@@ -79,7 +87,9 @@ def diff(ctx: click.Context, names: List[str]):
 
 @main.command()
 @click.pass_context
-@click.argument("names", type=click.Path(exists=True), nargs=-1, metavar="[PATH] ...")
+@click.argument(
+    "names", type=click.Path(allow_dash=True), nargs=-1, metavar="[PATH] ..."
+)
 def format(ctx: click.Context, names: List[str]):
     """Format one or more paths in place"""
     paths = [Path(name) for name in names] if names else [Path(".")]
