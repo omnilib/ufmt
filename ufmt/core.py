@@ -64,6 +64,8 @@ def ufmt_bytes(
         best guess at file encodings. Otherwise, use :func:`tokenize.detect_encodings`.
     """
     result = usort(content, usort_config, path)
+    if result.error:
+        raise result.error
 
     if path.suffix == ".pyi":
         black_config = replace(black_config, is_pyi=True)
@@ -153,17 +155,21 @@ def ufmt_file(
 
     LOG.debug(f"Checking {path}")
 
-    src_contents, encoding, newline = read_file(path)
-    dst_contents = ufmt_bytes(
-        path,
-        src_contents,
-        encoding=encoding,
-        black_config=black_config,
-        usort_config=usort_config,
-        post_processor=post_processor,
-    )
-
     result = Result(path)
+
+    try:
+        src_contents, encoding, newline = read_file(path)
+        dst_contents = ufmt_bytes(
+            path,
+            src_contents,
+            encoding=encoding,
+            black_config=black_config,
+            usort_config=usort_config,
+            post_processor=post_processor,
+        )
+    except Exception as e:
+        result.error = e
+        return result
 
     if src_contents != dst_contents:
         result.changed = True
@@ -177,8 +183,11 @@ def ufmt_file(
 
         if not dry_run:
             LOG.debug(f"Formatted {path}")
-            write_file(path, dst_contents, newline=newline)
-            result.written = True
+            try:
+                write_file(path, dst_contents, newline=newline)
+                result.written = True
+            except Exception as e:
+                result.error = e
 
     return result
 
