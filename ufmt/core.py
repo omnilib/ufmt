@@ -5,6 +5,7 @@ import logging
 from dataclasses import replace
 from functools import partial
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import List, Optional
 from warnings import warn
 
@@ -211,6 +212,45 @@ def ufmt_file(
                 result.error = e
 
     return result
+
+
+def ufmt_stdin(
+    path: Path,
+    *,
+    dry_run: bool = False,
+    diff: bool = False,
+    black_config_factory: Optional[BlackConfigFactory] = None,
+    usort_config_factory: Optional[UsortConfigFactory] = None,
+    pre_processor: Optional[Processor] = None,
+    post_processor: Optional[Processor] = None,
+) -> Result:
+    """
+    Wrapper around :ref:`ufmt_file` for formatting content from stdin.
+
+    Requires passing a path that represents the filesystem location matching the
+    contents to be formatted. Reads bytes from stdin until EOF, writes the content to
+    a temporary location on disk, and formats that file on disk using :ref:`ufmt_file`.
+    The :class:`Result` object will be updated to match the location given by ``path``.
+
+    See :func:`ufmt_file` for details on parameters, config factories,
+    and post processors. All parameters are passed through to :func:`ufmt_file`.
+    """
+    with TemporaryDirectory() as td:
+        tdp = Path(td)
+        temp_path = tdp / path.name
+
+        result = ufmt_file(
+            temp_path,
+            dry_run=dry_run,
+            diff=diff,
+            black_config_factory=black_config_factory,
+            usort_config_factory=usort_config_factory,
+            pre_processor=pre_processor,
+            post_processor=post_processor,
+        )
+        result.path = path
+
+        return result
 
 
 def ufmt_paths(
