@@ -9,6 +9,8 @@ from black import Mode as BlackConfig
 from typing_extensions import Protocol
 from usort import Config as UsortConfig
 
+STDIN = Path("-")
+
 Encoding = str
 FileContent = bytes
 Newline = bytes

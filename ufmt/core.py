@@ -2,8 +2,10 @@
 # Licensed under the MIT license
 
 import logging
+import sys
 from dataclasses import replace
 from functools import partial
+from multiprocessing.sharedctypes import Value
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import List, Optional
@@ -22,6 +24,7 @@ from .types import (
     FileContent,
     Processor,
     Result,
+    STDIN,
     UsortConfig,
     UsortConfigFactory,
 )
@@ -225,10 +228,14 @@ def ufmt_stdin(
     post_processor: Optional[Processor] = None,
 ) -> Result:
     """
-    Wrapper around :ref:`ufmt_file` for formatting content from stdin.
+    Wrapper around :ref:`ufmt_file` for formatting content from STDIN.
+
+    If given ``dry_run = False``, the resulting formatted content will be printed
+    to STDOUT. Diff content and changed status will be returned as part of the
+    :class:`Result` object as normal.
 
     Requires passing a path that represents the filesystem location matching the
-    contents to be formatted. Reads bytes from stdin until EOF, writes the content to
+    contents to be formatted. Reads bytes from STDIN until EOF, writes the content to
     a temporary location on disk, and formats that file on disk using :ref:`ufmt_file`.
     The :class:`Result` object will be updated to match the location given by ``path``.
 
@@ -238,6 +245,10 @@ def ufmt_stdin(
     with TemporaryDirectory() as td:
         tdp = Path(td)
         temp_path = tdp / path.name
+
+        # read from stdin
+        content = sys.stdin.buffer.read()
+        temp_path.write_bytes(content)
 
         result = ufmt_file(
             temp_path,
@@ -249,6 +260,12 @@ def ufmt_stdin(
             post_processor=post_processor,
         )
         result.path = path
+
+        # write to stdout if not check/diff mode
+        if not dry_run:
+            content = temp_path.read_bytes()
+            sys.stdout.buffer.write(content)
+            sys.stdout.buffer.flush()
 
         return result
 
@@ -277,6 +294,12 @@ def ufmt_paths(
     responsibility of code calling this function to check for errors in results and
     handle or surface them appropriately.
 
+    If the first given path is STDIN (``Path("-")``), then content will be formatted
+    from STDIN using :func:`ufmt_stdin`. Results will be printed to STDOUT.
+    A second path argument may be given, which represents the original content's true
+    path name, and will be used when printing status messages, diffs, or errors.
+    Any further path names will result in a runtime error.
+
     See :func:`ufmt_file` for details on parameters, config factories,
     and post processors. All parameters are passed through to :func:`ufmt_file`.
 
@@ -284,11 +307,40 @@ def ufmt_paths(
         Factory and post processing functions must be pickleable when using
         :func:`ufmt_paths`.
     """
+    if not paths:
+        return []
+
+    # format stdin and short-circuit
+    if paths[0] == STDIN:
+        if len(paths) > 2:
+            raise ValueError("too many stdin paths")
+        elif len(paths) == 2:
+            _, path = paths
+        else:
+            path = Path("<stdin>")
+        return [
+            ufmt_stdin(
+                path,
+                dry_run=dry_run,
+                diff=diff,
+                black_config_factory=black_config_factory,
+                usort_config_factory=usort_config_factory,
+                pre_processor=pre_processor,
+                post_processor=post_processor,
+            )
+        ]
+
     all_paths: List[Path] = []
     runner = Trailrunner()
     for path in paths:
+        if path == STDIN:
+            LOG.warning("Cannot mix stdin ('-') with normal paths, ignoring")
+            continue
         config = ufmt_config(path)
         all_paths.extend(runner.walk(path, excludes=config.excludes))
+
+    if not all_paths:
+        return []
 
     fn = partial(
         ufmt_file,
@@ -299,6 +351,9 @@ def ufmt_paths(
         pre_processor=pre_processor,
         post_processor=post_processor,
     )
-    results = list(runner.run(all_paths, fn).values())
+    if len(all_paths) > 1:
+        results = list(runner.run(all_paths, fn).values())
+    else:
+        results = [fn(all_paths[0])]  # skip multiprocessing for a single path
 
     return results

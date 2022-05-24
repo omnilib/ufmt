@@ -15,6 +15,8 @@ from libcst import ParserSyntaxError
 from ufmt.cli import echo_results, main
 from ufmt.core import Result
 
+from .core import CORRECTLY_FORMATTED_CODE, POORLY_FORMATTED_CODE
+
 
 @patch.object(trailrunner.core.Trailrunner, "DEFAULT_EXECUTOR", ThreadPoolExecutor)
 class CliTest(TestCase):
@@ -53,8 +55,8 @@ class CliTest(TestCase):
             echo_results(results)
             echo_mock.assert_has_calls(
                 [
-                    call(f"Would format {f2}"),
-                    call(f"Formatted {f3}"),
+                    call(f"Would format {f2}", err=True),
+                    call(f"Formatted {f3}", err=True),
                 ]
             )
             mol_mock.assert_not_called()
@@ -65,8 +67,8 @@ class CliTest(TestCase):
             echo_results(results, diff=True)
             echo_mock.assert_has_calls(
                 [
-                    call(f"Would format {f2}"),
-                    call(f"Formatted {f3}"),
+                    call(f"Would format {f2}", err=True),
+                    call(f"Formatted {f3}", err=True),
                 ]
             )
             mol_mock.assert_has_calls(
@@ -82,19 +84,13 @@ class CliTest(TestCase):
     def test_check(self, ufmt_mock):
         runner = CliRunner()
 
-        with self.subTest("paths not exist"):
-            ufmt_mock.reset_mock()
-            result = runner.invoke(main, ["check", "fake.py"])
-            ufmt_mock.assert_not_called()
-            self.assertEqual(2, result.exit_code)
-            self.assertRegex(result.output, "Path '.*' does not exist")
-
         with self.subTest("no paths given"):
             ufmt_mock.reset_mock()
             ufmt_mock.return_value = []
             result = runner.invoke(main, ["check"])
             ufmt_mock.assert_called_with([Path(".")], dry_run=True)
-            self.assertEqual(0, result.exit_code)
+            self.assertRegex(result.stdout, r"No files found")
+            self.assertEqual(1, result.exit_code)
 
         with self.subTest("already formatted"):
             ufmt_mock.reset_mock()
@@ -147,19 +143,13 @@ class CliTest(TestCase):
     def test_diff(self, ufmt_mock):
         runner = CliRunner()
 
-        with self.subTest("paths not exist"):
-            ufmt_mock.reset_mock()
-            result = runner.invoke(main, ["diff", "fake.py"])
-            ufmt_mock.assert_not_called()
-            self.assertEqual(2, result.exit_code)
-            self.assertRegex(result.output, "Path '.*' does not exist")
-
         with self.subTest("no paths given"):
             ufmt_mock.reset_mock()
             ufmt_mock.return_value = []
             result = runner.invoke(main, ["diff"])
             ufmt_mock.assert_called_with([Path(".")], dry_run=True, diff=True)
-            self.assertEqual(0, result.exit_code)
+            self.assertRegex(result.stdout, r"No files found")
+            self.assertEqual(1, result.exit_code)
 
         with self.subTest("already formatted"):
             ufmt_mock.reset_mock()
@@ -212,18 +202,13 @@ class CliTest(TestCase):
     def test_format(self, ufmt_mock):
         runner = CliRunner()
 
-        with self.subTest("paths not exist"):
-            ufmt_mock.reset_mock()
-            result = runner.invoke(main, ["format", "fake.py"])
-            self.assertEqual(2, result.exit_code)
-            self.assertRegex(result.output, "Path '.*' does not exist")
-
         with self.subTest("no paths given"):
             ufmt_mock.reset_mock()
             ufmt_mock.return_value = []
             result = runner.invoke(main, ["format"])
             ufmt_mock.assert_called_with([Path(".")])
-            self.assertEqual(0, result.exit_code)
+            self.assertRegex(result.stdout, r"No files found")
+            self.assertEqual(1, result.exit_code)
 
         with self.subTest("already formatted"):
             ufmt_mock.reset_mock()
@@ -265,3 +250,66 @@ class CliTest(TestCase):
                 result.stdout, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
             )
             self.assertEqual(1, result.exit_code)
+
+    def test_stdin(self) -> None:
+        runner = CliRunner(mix_stderr=False)
+
+        with self.subTest("check clean"):
+            result = runner.invoke(
+                main,
+                ["check", "-", "hello.py"],
+                input=CORRECTLY_FORMATTED_CODE,
+            )
+            self.assertEqual("", result.stdout)
+            self.assertEqual("", result.stderr)
+            self.assertEqual(0, result.exit_code)
+
+        with self.subTest("check dirty"):
+            result = runner.invoke(
+                main,
+                ["check", "-"],
+                input=POORLY_FORMATTED_CODE,
+            )
+            self.assertEqual("", result.stdout)
+            self.assertEqual("Would format <stdin>\n", result.stderr)
+            self.assertEqual(1, result.exit_code)
+
+        with self.subTest("diff clean"):
+            result = runner.invoke(
+                main,
+                ["diff", "-", "hello.py"],
+                input=CORRECTLY_FORMATTED_CODE,
+            )
+            self.assertEqual("", result.stdout)
+            self.assertEqual("", result.stderr)
+            self.assertEqual(0, result.exit_code)
+
+        with self.subTest("diff dirty"):
+            result = runner.invoke(
+                main,
+                ["diff", "-", "hello.py"],
+                input=POORLY_FORMATTED_CODE,
+            )
+            self.assertRegex(result.stdout, r"---.*\n\+\+\+")
+            self.assertEqual("Would format hello.py\n", result.stderr)
+            self.assertEqual(1, result.exit_code)
+
+        with self.subTest("format clean"):
+            result = runner.invoke(
+                main,
+                ["format", "-", "hello.py"],
+                input=CORRECTLY_FORMATTED_CODE,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_CODE, result.stdout)
+            self.assertEqual("", result.stderr)
+            self.assertEqual(0, result.exit_code)
+
+        with self.subTest("format dirty"):
+            result = runner.invoke(
+                main,
+                ["format", "-", "hello.py"],
+                input=POORLY_FORMATTED_CODE,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_CODE, result.stdout)
+            self.assertEqual("Formatted hello.py\n", result.stderr)
+            self.assertEqual(0, result.exit_code)
