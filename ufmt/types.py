@@ -44,3 +44,5 @@ class Result:
     written: bool = False
     diff: Optional[str] = None
     error: Optional[Exception] = None
+    before: bytes = b""  # only set if return_content=True
+    after: bytes = b""  # only set if return_content=True

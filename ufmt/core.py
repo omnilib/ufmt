@@ -142,6 +142,7 @@ def ufmt_file(
     *,
     dry_run: bool = False,
     diff: bool = False,
+    return_content: bool = False,
     black_config_factory: Optional[BlackConfigFactory] = None,
     usort_config_factory: Optional[UsortConfigFactory] = None,
     pre_processor: Optional[Processor] = None,
@@ -152,7 +153,9 @@ def ufmt_file(
 
     Passing ``dry_run = True`` will only format the file in memory, without writing
     changes to disk. Passing ``diff = True`` will generate a unified diff of changes
-    on the :class:`Result` object.
+    on :attr:`Result.diff`. Passing ``return_content = True`` will also populate
+    :attr:`Result.before` and :attr:`Result.after` with the bytes content of the file
+    from before and after formatting, respectively.
 
     Any errors that occur during formatting will be caught, and those exceptions will
     be attached to the :attr:`Result.error` property of the result object. It is the
@@ -195,6 +198,10 @@ def ufmt_file(
         result.error = e
         return result
 
+    if return_content:
+        result.before = src_contents
+        result.after = dst_contents
+
     if src_contents != dst_contents:
         result.changed = True
 
@@ -221,6 +228,7 @@ def ufmt_stdin(
     *,
     dry_run: bool = False,
     diff: bool = False,
+    return_content: bool = False,
     black_config_factory: Optional[BlackConfigFactory] = None,
     usort_config_factory: Optional[UsortConfigFactory] = None,
     pre_processor: Optional[Processor] = None,
@@ -253,6 +261,7 @@ def ufmt_stdin(
             temp_path,
             dry_run=dry_run,
             diff=diff,
+            return_content=return_content,
             black_config_factory=black_config_factory,
             usort_config_factory=usort_config_factory,
             pre_processor=pre_processor,
@@ -274,6 +283,7 @@ def ufmt_paths(
     *,
     dry_run: bool = False,
     diff: bool = False,
+    return_content: bool = False,
     black_config_factory: Optional[BlackConfigFactory] = None,
     usort_config_factory: Optional[UsortConfigFactory] = None,
     pre_processor: Optional[Processor] = None,
@@ -322,6 +332,7 @@ def ufmt_paths(
                 path,
                 dry_run=dry_run,
                 diff=diff,
+                return_content=return_content,
                 black_config_factory=black_config_factory,
                 usort_config_factory=usort_config_factory,
                 pre_processor=pre_processor,
@@ -345,6 +356,7 @@ def ufmt_paths(
         ufmt_file,
         dry_run=dry_run,
         diff=diff,
+        return_content=return_content,
         black_config_factory=black_config_factory,
         usort_config_factory=usort_config_factory,
         pre_processor=pre_processor,

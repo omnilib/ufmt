@@ -355,6 +355,7 @@ class CoreTest(TestCase):
                                 f1,
                                 dry_run=True,
                                 diff=False,
+                                return_content=False,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -364,6 +365,7 @@ class CoreTest(TestCase):
                                 f3,
                                 dry_run=True,
                                 diff=False,
+                                return_content=False,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -384,6 +386,7 @@ class CoreTest(TestCase):
                                 f1,
                                 dry_run=True,
                                 diff=True,
+                                return_content=False,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -393,6 +396,7 @@ class CoreTest(TestCase):
                                 f3,
                                 dry_run=True,
                                 diff=True,
+                                return_content=False,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -412,6 +416,7 @@ class CoreTest(TestCase):
                                 f2,
                                 dry_run=False,
                                 diff=False,
+                                return_content=False,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -421,6 +426,7 @@ class CoreTest(TestCase):
                                 f3,
                                 dry_run=False,
                                 diff=False,
+                                return_content=False,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -442,6 +448,7 @@ class CoreTest(TestCase):
                 Path("<stdin>"),
                 dry_run=True,
                 diff=False,
+                return_content=False,
                 black_config_factory=None,
                 usort_config_factory=None,
                 pre_processor=None,
@@ -454,6 +461,7 @@ class CoreTest(TestCase):
                 Path("hello.py"),
                 dry_run=True,
                 diff=False,
+                return_content=False,
                 black_config_factory=None,
                 usort_config_factory=None,
                 pre_processor=None,
@@ -490,6 +498,7 @@ class CoreTest(TestCase):
                             f2,
                             dry_run=False,
                             diff=False,
+                            return_content=False,
                             black_config_factory=None,
                             usort_config_factory=None,
                             pre_processor=None,
@@ -501,3 +510,23 @@ class CoreTest(TestCase):
                 self.assertEqual(f1.read_text(), POORLY_FORMATTED_CODE)
                 self.assertEqual(f2.read_text(), CORRECTLY_FORMATTED_CODE)
                 self.assertEqual(f3.read_text(), POORLY_FORMATTED_CODE)
+
+    def test_e2e_return_bytes(self):
+        with TemporaryDirectory() as td:
+            td = Path(td).resolve()
+            foo = td / "foo.py"
+            foo.write_text(POORLY_FORMATTED_CODE)
+
+            results = list(ufmt.ufmt_paths([foo], return_content=True))
+            expected = [
+                ufmt.Result(
+                    foo,
+                    changed=True,
+                    written=True,
+                    diff=None,
+                    error=None,
+                    before=POORLY_FORMATTED_CODE.encode(),
+                    after=CORRECTLY_FORMATTED_CODE.encode(),
+                )
+            ]
+            self.assertEqual(expected, results)
