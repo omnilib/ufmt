@@ -12,7 +12,7 @@ requires = [
     "black>=20.8b0",
     "moreorless>=0.4.0",
     "tomlkit>=0.7.2",
-    "trailrunner>=1.2",
+    "trailrunner>=1.2.1",
     "typing_extensions>=4.0",
     "usort>=1.0",
 ]
