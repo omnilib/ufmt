@@ -7,7 +7,7 @@ from dataclasses import replace
 from functools import partial
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import List, Optional
+from typing import Generator, List, Optional, Sequence
 from warnings import warn
 
 from black import format_file_contents, NothingChanged
@@ -279,7 +279,7 @@ def ufmt_stdin(
 
 
 def ufmt_paths(
-    paths: List[Path],
+    paths: Sequence[Path],
     *,
     dry_run: bool = False,
     diff: bool = False,
@@ -288,7 +288,7 @@ def ufmt_paths(
     usort_config_factory: Optional[UsortConfigFactory] = None,
     pre_processor: Optional[Processor] = None,
     post_processor: Optional[Processor] = None,
-) -> List[Result]:
+) -> Generator[Result, None, None]:
     """
     Format one or more paths, recursively, ignoring any files excluded by configuration.
 
@@ -297,7 +297,7 @@ def ufmt_paths(
     given paths, all files will be formatted using a process pool for improved
     performance and CPU utilization.
 
-    Returns a list of :class:`Result` objects for each file formatted.
+    Returns a generator yielding :class:`Result` objects for each file formatted.
     Any errors that occur during formatting will be caught, and those exceptions will
     be attached to the :attr:`Result.error` property of the result object. It is the
     responsibility of code calling this function to check for errors in results and
@@ -317,7 +317,7 @@ def ufmt_paths(
         :func:`ufmt_paths`.
     """
     if not paths:
-        return []
+        return
 
     # format stdin and short-circuit
     if paths[0] == STDIN:
@@ -327,18 +327,16 @@ def ufmt_paths(
             _, path = paths
         else:
             path = Path("<stdin>")
-        return [
-            ufmt_stdin(
-                path,
-                dry_run=dry_run,
-                diff=diff,
-                return_content=return_content,
-                black_config_factory=black_config_factory,
-                usort_config_factory=usort_config_factory,
-                pre_processor=pre_processor,
-                post_processor=post_processor,
-            )
-        ]
+        yield ufmt_stdin(
+            path,
+            dry_run=dry_run,
+            diff=diff,
+            return_content=return_content,
+            black_config_factory=black_config_factory,
+            usort_config_factory=usort_config_factory,
+            pre_processor=pre_processor,
+            post_processor=post_processor,
+        )
 
     all_paths: List[Path] = []
     runner = Trailrunner()
@@ -350,7 +348,7 @@ def ufmt_paths(
         all_paths.extend(runner.walk(path, excludes=config.excludes))
 
     if not all_paths:
-        return []
+        return
 
     fn = partial(
         ufmt_file,
@@ -363,8 +361,7 @@ def ufmt_paths(
         post_processor=post_processor,
     )
     if len(all_paths) > 1:
-        results = list(runner.run(all_paths, fn).values())
+        for _, result in runner.run_iter(all_paths, fn):
+            yield result
     else:
-        results = [fn(all_paths[0])]  # skip multiprocessing for a single path
-
-    return results
+        yield fn(all_paths[0])  # skip multiprocessing for a single path

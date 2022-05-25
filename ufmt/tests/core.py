@@ -330,24 +330,26 @@ class CoreTest(TestCase):
             file_wrapper = Mock(name="ufmt_file", wraps=ufmt.ufmt_file)
             with patch("ufmt.core.ufmt_file", file_wrapper):
                 with self.subTest("no paths"):
-                    results = ufmt.ufmt_paths([], dry_run=True)
+                    results = list(ufmt.ufmt_paths([], dry_run=True))
                     self.assertEqual([], results)
                     file_wrapper.assert_not_called()
 
                 with self.subTest("non-existent paths"):
-                    results = ufmt.ufmt_paths(
-                        [(td / "fake.py"), (td / "another.py")], dry_run=True
+                    results = list(
+                        ufmt.ufmt_paths(
+                            [(td / "fake.py"), (td / "another.py")], dry_run=True
+                        )
                     )
                     self.assertEqual([], results)
 
                 with self.subTest("mixed paths with stdin"):
                     with patch("ufmt.core.LOG") as log_mock:
-                        results = ufmt.ufmt_paths([f1, STDIN, f3], dry_run=True)
+                        results = list(ufmt.ufmt_paths([f1, STDIN, f3], dry_run=True))
                         self.assertEqual(2, len(results))
                         log_mock.warning.assert_called_once()
 
                 with self.subTest("files"):
-                    results = ufmt.ufmt_paths([f1, f3], dry_run=True)
+                    results = list(ufmt.ufmt_paths([f1, f3], dry_run=True))
                     self.assertEqual(2, len(results))
                     file_wrapper.assert_has_calls(
                         [
@@ -378,7 +380,7 @@ class CoreTest(TestCase):
                     file_wrapper.reset_mock()
 
                 with self.subTest("files with diff"):
-                    results = ufmt.ufmt_paths([f1, f3], dry_run=True, diff=True)
+                    results = list(ufmt.ufmt_paths([f1, f3], dry_run=True, diff=True))
                     self.assertEqual(2, len(results))
                     file_wrapper.assert_has_calls(
                         [
@@ -409,7 +411,7 @@ class CoreTest(TestCase):
                     file_wrapper.reset_mock()
 
                 with self.subTest("subdir"):
-                    results = ufmt.ufmt_paths([sd])
+                    results = list(ufmt.ufmt_paths([sd]))
                     file_wrapper.assert_has_calls(
                         [
                             call(
@@ -443,7 +445,7 @@ class CoreTest(TestCase):
         stdin_mock.return_value = Result(path=STDIN, changed=True)
 
         with self.subTest("no name"):
-            ufmt.ufmt_paths([STDIN], dry_run=True)
+            list(ufmt.ufmt_paths([STDIN], dry_run=True))
             stdin_mock.assert_called_with(
                 Path("<stdin>"),
                 dry_run=True,
@@ -456,7 +458,7 @@ class CoreTest(TestCase):
             )
 
         with self.subTest("path name"):
-            ufmt.ufmt_paths([STDIN, Path("hello.py")], dry_run=True)
+            list(ufmt.ufmt_paths([STDIN, Path("hello.py")], dry_run=True))
             stdin_mock.assert_called_with(
                 Path("hello.py"),
                 dry_run=True,
@@ -470,7 +472,11 @@ class CoreTest(TestCase):
 
         with self.subTest("extra args"):
             with self.assertRaisesRegex(ValueError, "too many stdin paths"):
-                ufmt.ufmt_paths([STDIN, Path("hello.py"), Path("foo.py")], dry_run=True)
+                list(
+                    ufmt.ufmt_paths(
+                        [STDIN, Path("hello.py"), Path("foo.py")], dry_run=True
+                    )
+                )
 
     def test_ufmt_paths_config(self):
         with TemporaryDirectory() as td:
@@ -491,7 +497,7 @@ class CoreTest(TestCase):
 
             file_wrapper = Mock(name="ufmt_file", wraps=ufmt.ufmt_file)
             with patch("ufmt.core.ufmt_file", file_wrapper):
-                ufmt.ufmt_paths([td])
+                list(ufmt.ufmt_paths([td]))
                 file_wrapper.assert_has_calls(
                     [
                         call(
