@@ -4,7 +4,7 @@
 import logging
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import Iterable, List, Tuple
 
 import click
 from moreorless.click import echo_color_precomputed_diff
@@ -22,15 +22,14 @@ def init_logging(*, debug: bool = False) -> None:
     logging.getLogger("blib2to3").setLevel(logging.WARNING)
 
 
-def echo_results(results: List[Result], diff: bool = False) -> Tuple[bool, bool]:
-    if not results:
-        click.secho("No files found", fg="yellow", err=True)
-        return False, True
-
+def echo_results(results: Iterable[Result], diff: bool = False) -> Tuple[bool, bool]:
+    empty = True
     error = False
     changed = False
 
     for result in results:
+        empty = False
+
         if result.error is not None:
             msg = str(result.error)
             lines = msg.splitlines()
@@ -46,6 +45,10 @@ def echo_results(results: List[Result], diff: bool = False) -> Tuple[bool, bool]
                 click.echo(f"Would format {result.path}", err=True)
             if diff and result.diff:
                 echo_color_precomputed_diff(result.diff)
+
+    if empty:
+        click.secho("No files found", fg="yellow", err=True)
+        error = True
 
     return changed, error
 
