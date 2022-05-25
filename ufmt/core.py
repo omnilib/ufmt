@@ -227,7 +227,7 @@ def ufmt_stdin(
     post_processor: Optional[Processor] = None,
 ) -> Result:
     """
-    Wrapper around :ref:`ufmt_file` for formatting content from STDIN.
+    Wrapper around :func:`ufmt_file` for formatting content from STDIN.
 
     If given ``dry_run = False``, the resulting formatted content will be printed
     to STDOUT. Diff content and changed status will be returned as part of the
@@ -235,7 +235,7 @@ def ufmt_stdin(
 
     Requires passing a path that represents the filesystem location matching the
     contents to be formatted. Reads bytes from STDIN until EOF, writes the content to
-    a temporary location on disk, and formats that file on disk using :ref:`ufmt_file`.
+    a temporary location on disk, and formats that file on disk using :func:`ufmt_file`.
     The :class:`Result` object will be updated to match the location given by ``path``.
 
     See :func:`ufmt_file` for details on parameters, config factories,
