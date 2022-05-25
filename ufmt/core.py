@@ -188,7 +188,7 @@ def ufmt_file(
             encoding=encoding,
             black_config=black_config,
             usort_config=usort_config,
-            pre_processor=post_processor,
+            pre_processor=pre_processor,
             post_processor=post_processor,
         )
     except Exception as e:
