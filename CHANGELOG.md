@@ -1,6 +1,22 @@
 µfmt
 ====
 
+v2.0.0a3
+--------
+
+Alpha release
+
+- New: ufmt_paths now returns a generator yielding results as they complete (#76)
+- New: Add return_content flag to API to save before/after bytes on results (#75)
+- Fix: export ufmt_stdin and add to API docs
+- Fix: correctly pass pre_processor through ufmt_file
+
+```
+$ git shortlog -s v2.0.0a2...v2.0.0a3
+    10	John Reese
+```
+
+
 v2.0.0a2
 --------
 
