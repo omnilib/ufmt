@@ -13,6 +13,7 @@ from .types import (
     Newline,
     Processor,
     Result,
+    SkipFormatting,
     UsortConfig,
     UsortConfigFactory,
 )
@@ -25,6 +26,7 @@ __all__ = [
     "Newline",
     "Processor",
     "Result",
+    "SkipFormatting",
     "ufmt_bytes",
     "ufmt_file",
     "ufmt_paths",

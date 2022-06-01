@@ -37,7 +37,11 @@ def echo_results(results: Iterable[Result], diff: bool = False) -> Tuple[bool, b
             click.secho(f"Error formatting {result.path}: {msg}", fg="yellow", err=True)
             error = True
 
-        if result.changed:
+        elif result.skipped:
+            reason = f": {result.skipped}" if isinstance(result.skipped, str) else ""
+            click.echo(f"Skipped {result.path}{reason}")
+
+        elif result.changed:
             changed = True
             if result.written:
                 click.echo(f"Formatted {result.path}", err=True)

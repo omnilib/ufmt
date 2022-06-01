@@ -140,6 +140,16 @@ class CliTest(TestCase):
             )
             self.assertEqual(1, result.exit_code)
 
+        with self.subTest("skipped file"):
+            ufmt_mock.reset_mock()
+            ufmt_mock.return_value = [
+                Result(Path("foo.py"), skipped="special"),
+            ]
+            result = runner.invoke(main, ["check", "foo.py"])
+            ufmt_mock.assert_called_with([Path("foo.py")], dry_run=True)
+            self.assertRegex(result.stdout, r"Skipped .*foo\.py: special")
+            self.assertEqual(0, result.exit_code)
+
     @patch("ufmt.cli.ufmt_paths")
     def test_diff(self, ufmt_mock):
         runner = CliRunner()
@@ -199,6 +209,16 @@ class CliTest(TestCase):
             )
             self.assertEqual(1, result.exit_code)
 
+        with self.subTest("skipped file"):
+            ufmt_mock.reset_mock()
+            ufmt_mock.return_value = [
+                Result(Path("foo.py"), skipped="special"),
+            ]
+            result = runner.invoke(main, ["diff", "foo.py"])
+            ufmt_mock.assert_called_with([Path("foo.py")], dry_run=True, diff=True)
+            self.assertRegex(result.stdout, r"Skipped .*foo\.py: special")
+            self.assertEqual(0, result.exit_code)
+
     @patch("ufmt.cli.ufmt_paths")
     def test_format(self, ufmt_mock):
         runner = CliRunner()
@@ -251,6 +271,16 @@ class CliTest(TestCase):
                 result.stdout, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
             )
             self.assertEqual(1, result.exit_code)
+
+        with self.subTest("skipped file"):
+            ufmt_mock.reset_mock()
+            ufmt_mock.return_value = [
+                Result(Path("foo.py"), skipped="special"),
+            ]
+            result = runner.invoke(main, ["format", "foo.py"])
+            ufmt_mock.assert_called_with([Path("foo.py")])
+            self.assertRegex(result.stdout, r"Skipped .*foo\.py: special")
+            self.assertEqual(0, result.exit_code)
 
     @skipIf(platform.system() == "Windows", "stderr not supported on Windows")
     def test_stdin(self) -> None:

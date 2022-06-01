@@ -23,6 +23,7 @@ from .types import (
     FileContent,
     Processor,
     Result,
+    SkipFormatting,
     STDIN,
     UsortConfig,
     UsortConfigFactory,
@@ -174,6 +175,11 @@ def ufmt_file(
     If given, the post processor will be called with the updated byte string content
     after it has been run through µsort and black. The return value of the post
     processor will replace the final return value of :func:`ufmt_bytes`.
+
+    Raising :exc:`ufmt.SkipFormatting` from a pre- or post-processor will result in
+    "skipping" the file currently being formatted. The final contents will be unchanged,
+    and the :attr:`Result.skipped` attribute will be set with the string message from
+    the skip exception, or ``True`` if no message is given.
     """
     path = path.resolve()
     black_config = (black_config_factory or make_black_config)(path)
@@ -194,6 +200,11 @@ def ufmt_file(
             pre_processor=pre_processor,
             post_processor=post_processor,
         )
+    except SkipFormatting as e:
+        dst_contents = src_contents
+        result.skipped = str(e) or True
+        return result
+
     except Exception as e:
         result.error = e
         return result

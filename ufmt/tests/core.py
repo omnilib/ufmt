@@ -13,7 +13,15 @@ from libcst import ParserSyntaxError
 
 import ufmt
 from ufmt.core import ufmt_stdin
-from ufmt.types import BlackConfig, Encoding, Result, STDIN, UsortConfig
+from ufmt.types import (
+    BlackConfig,
+    Encoding,
+    FileContent,
+    Result,
+    SkipFormatting,
+    STDIN,
+    UsortConfig,
+)
 
 FAKE_CONFIG = """
 [tool.ufmt]
@@ -274,6 +282,34 @@ class CoreTest(TestCase):
 
                     result = ufmt.ufmt_file(f)
                     self.assertIsInstance(result.error, PermissionError)
+
+            with self.subTest("skipped file no reason"):
+
+                def skip_no_reason(
+                    path: Path, content: FileContent, *, encoding: Encoding = "utf-8"
+                ) -> FileContent:
+                    raise SkipFormatting
+
+                f.write_text(POORLY_FORMATTED_CODE)
+
+                result = ufmt.ufmt_file(f, pre_processor=skip_no_reason)
+                self.assertTrue(result.skipped)
+                self.assertIs(result.skipped, True)
+                self.assertEqual(POORLY_FORMATTED_CODE, f.read_text())
+
+            with self.subTest("skipped file no reason"):
+
+                def skip_with_reason(
+                    path: Path, content: FileContent, *, encoding: Encoding = "utf-8"
+                ) -> FileContent:
+                    raise SkipFormatting("because I said so")
+
+                f.write_text(POORLY_FORMATTED_CODE)
+
+                result = ufmt.ufmt_file(f, pre_processor=skip_with_reason)
+                self.assertTrue(result.skipped)
+                self.assertEqual(result.skipped, "because I said so")
+                self.assertEqual(POORLY_FORMATTED_CODE, f.read_text())
 
     @patch("ufmt.core.sys.stdin")
     @patch("ufmt.core.sys.stdout")
