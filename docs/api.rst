@@ -33,6 +33,8 @@ Simple API
 .. autoclass:: ufmt.Processor
     :special-members: __call__
 
+.. autoclass:: ufmt.SkipFormatting
+
 
 Low-level API
 -------------
