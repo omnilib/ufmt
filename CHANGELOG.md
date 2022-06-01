@@ -1,6 +1,19 @@
 µfmt
 ====
 
+v2.0.0a4
+--------
+
+Alpha release
+
+- New: allow raising `SkipFormatting` from pre/post processors to skip file (#79)
+
+```
+$ git shortlog -s v2.0.0a3...v2.0.0a4
+     4	John Reese
+```
+
+
 v2.0.0a3
 --------
 
