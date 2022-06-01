@@ -3,7 +3,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 from black import Mode as BlackConfig
 from typing_extensions import Protocol
@@ -33,6 +33,10 @@ class Processor(Protocol):
         ...
 
 
+class SkipFormatting(Exception):
+    """Raise this exception in a pre/post processor to skip formatting a file."""
+
+
 @dataclass
 class Result:
     """
@@ -42,6 +46,7 @@ class Result:
     path: Path
     changed: bool = False
     written: bool = False
+    skipped: Union[bool, str] = False
     diff: Optional[str] = None
     error: Optional[Exception] = None
     before: bytes = b""  # only set if return_content=True

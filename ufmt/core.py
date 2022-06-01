@@ -23,6 +23,7 @@ from .types import (
     FileContent,
     Processor,
     Result,
+    SkipFormatting,
     STDIN,
     UsortConfig,
     UsortConfigFactory,
@@ -194,6 +195,11 @@ def ufmt_file(
             pre_processor=pre_processor,
             post_processor=post_processor,
         )
+    except SkipFormatting as e:
+        dst_contents = src_contents
+        result.skipped = str(e) or True
+        return result
+
     except Exception as e:
         result.error = e
         return result
