@@ -559,7 +559,7 @@ class CoreTest(TestCase):
             foo = td / "foo.py"
 
             with self.subTest("unix newlines"):
-                foo.write_text(POORLY_FORMATTED_CODE)
+                foo.write_bytes(POORLY_FORMATTED_CODE.encode())
 
                 results = list(ufmt.ufmt_paths([foo], return_content=True))
                 expected = [
