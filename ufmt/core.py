@@ -28,7 +28,7 @@ from .types import (
     UsortConfig,
     UsortConfigFactory,
 )
-from .util import make_black_config, read_file, write_file
+from .util import make_black_config, normalize_result, read_file, write_file
 
 LOG = logging.getLogger(__name__)
 
@@ -209,17 +209,21 @@ def ufmt_file(
         result.error = e
         return result
 
-    if return_content:
-        result.before = src_contents
-        result.after = dst_contents
+    if return_content or diff:
+        src_result = normalize_result(src_contents, newline)
+        dst_result = normalize_result(dst_contents, newline)
+
+        if return_content:
+            result.before = src_result
+            result.after = dst_result
 
     if src_contents != dst_contents:
         result.changed = True
 
         if diff:
             result.diff = unified_diff(
-                src_contents.decode(encoding),
-                dst_contents.decode(encoding),
+                src_result.decode(encoding),
+                dst_result.decode(encoding),
                 path.as_posix(),
             )
 

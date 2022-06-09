@@ -557,18 +557,40 @@ class CoreTest(TestCase):
         with TemporaryDirectory() as td:
             td = Path(td).resolve()
             foo = td / "foo.py"
-            foo.write_text(POORLY_FORMATTED_CODE)
 
-            results = list(ufmt.ufmt_paths([foo], return_content=True))
-            expected = [
-                ufmt.Result(
-                    foo,
-                    changed=True,
-                    written=True,
-                    diff=None,
-                    error=None,
-                    before=POORLY_FORMATTED_CODE.encode(),
-                    after=CORRECTLY_FORMATTED_CODE.encode(),
-                )
-            ]
-            self.assertEqual(expected, results)
+            with self.subTest("unix newlines"):
+                foo.write_text(POORLY_FORMATTED_CODE)
+
+                results = list(ufmt.ufmt_paths([foo], return_content=True))
+                expected = [
+                    ufmt.Result(
+                        foo,
+                        changed=True,
+                        written=True,
+                        diff=None,
+                        error=None,
+                        before=POORLY_FORMATTED_CODE.encode(),
+                        after=CORRECTLY_FORMATTED_CODE.encode(),
+                    )
+                ]
+                self.assertEqual(expected, results)
+
+            with self.subTest("crlf newlines"):
+                before = POORLY_FORMATTED_CODE.replace("\n", "\r\n").encode()
+                after = CORRECTLY_FORMATTED_CODE.replace("\n", "\r\n").encode()
+
+                foo.write_bytes(before)
+
+                results = list(ufmt.ufmt_paths([foo], return_content=True))
+                expected = [
+                    ufmt.Result(
+                        foo,
+                        changed=True,
+                        written=True,
+                        diff=None,
+                        error=None,
+                        before=before,
+                        after=after,
+                    )
+                ]
+                self.assertEqual(expected, results)
