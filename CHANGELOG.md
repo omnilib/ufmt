@@ -1,6 +1,21 @@
 µfmt
 ====
 
+v2.0.0b1
+--------
+
+Beta release
+
+- Fix: Handle CRLF newlines correctly in diff output and results (#85)
+- Fix: preserve given path when formatting stdin (#77)
+
+```
+$ git shortlog -s v2.0.0a4...v2.0.0b1
+     6	John Reese
+     2	dependabot[bot]
+```
+
+
 v2.0.0a4
 --------
 
