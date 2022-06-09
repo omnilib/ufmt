@@ -322,7 +322,7 @@ class CliTest(TestCase):
                 ["diff", "-", "hello.py"],
                 input=POORLY_FORMATTED_CODE,
             )
-            self.assertRegex(result.stdout, r"---.*\n\+\+\+")
+            self.assertRegex(result.stdout, r"--- hello.py\n\+\+\+ hello.py")
             self.assertEqual("Would format hello.py\n", result.stderr)
             self.assertEqual(1, result.exit_code)
 

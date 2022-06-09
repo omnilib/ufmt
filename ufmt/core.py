@@ -2,12 +2,13 @@
 # Licensed under the MIT license
 
 import logging
+import re
 import sys
 from dataclasses import replace
 from functools import partial
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Generator, List, Optional, Sequence
+from typing import Generator, List, Match, Optional, Sequence
 from warnings import warn
 
 from black import format_file_contents, NothingChanged
@@ -264,8 +265,11 @@ def ufmt_stdin(
     See :func:`ufmt_file` for details on parameters, config factories,
     and post processors. All parameters are passed through to :func:`ufmt_file`.
     """
+    black_config = (black_config_factory or make_black_config)(path)
+    usort_config = (usort_config_factory or UsortConfig.find)(path)
+
     with TemporaryDirectory() as td:
-        tdp = Path(td)
+        tdp = Path(td).resolve()
         temp_path = tdp / path.name
 
         # read from stdin
@@ -277,12 +281,20 @@ def ufmt_stdin(
             dry_run=dry_run,
             diff=diff,
             return_content=return_content,
-            black_config_factory=black_config_factory,
-            usort_config_factory=usort_config_factory,
+            black_config_factory=lambda p: black_config,
+            usort_config_factory=lambda p: usort_config,
             pre_processor=pre_processor,
             post_processor=post_processor,
         )
         result.path = path
+        if result.diff and path != STDIN:
+            real_path_str = path.as_posix()
+
+            def replacement(match: Match) -> str:
+                return match.group(1) + real_path_str
+
+            pattern = re.compile(r"^((?:---|\+\+\+)\s+).+$", re.M)
+            result.diff = pattern.sub(replacement, result.diff)
 
         # write to stdout if not check/diff mode
         if not dry_run:
@@ -352,6 +364,7 @@ def ufmt_paths(
             pre_processor=pre_processor,
             post_processor=post_processor,
         )
+        return
 
     all_paths: List[Path] = []
     runner = Trailrunner()

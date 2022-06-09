@@ -339,6 +339,22 @@ class CoreTest(TestCase):
             stdout.seek(0)
             self.assertEqual(b"", stdout.read())
 
+        with self.subTest("diff with path"):
+            stdin_mock.buffer = stdin = io.BytesIO()
+            stdout_mock.buffer = stdout = io.BytesIO()
+
+            stdin.write(POORLY_FORMATTED_CODE.encode())
+            stdin.seek(0)
+
+            path = Path("hello/world.py")
+            result = ufmt_stdin(path, dry_run=True, diff=True)
+            self.assertIsNotNone(result.diff)
+            self.assertRegex(
+                result.diff, r"--- hello.world\.py\n\+\+\+ hello.world\.py"
+            )
+            stdout.seek(0)
+            self.assertEqual(b"", stdout.read())
+
         with self.subTest("format"):
             stdin_mock.buffer = stdin = io.BytesIO()
             stdout_mock.buffer = stdout = io.BytesIO()
