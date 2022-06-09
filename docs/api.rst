@@ -49,6 +49,8 @@ Low-level API
 
 .. autofunction:: ufmt.ufmt_stdin
 
+.. autofunction:: ufmt.util.normalize_result
+
 .. autofunction:: ufmt.util.read_file
 
 .. autofunction:: ufmt.util.write_file

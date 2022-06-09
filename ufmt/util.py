@@ -35,6 +35,17 @@ def make_black_config(path: Path) -> BlackConfig:
     return BlackConfig(**config)
 
 
+def normalize_result(content: FileContent, newline: Newline) -> FileContent:
+    """
+    Convert bytes content with UNIX style line endings to the given style.
+
+    No-op if ``newline`` is given as ``b"\\n"``.
+    """
+    if newline != b"\n":
+        content = content.replace(b"\n", newline)
+    return content
+
+
 def read_file(path: Path) -> Tuple[FileContent, Encoding, Newline]:
     """
     Read a file from disk, detect encoding, and normalize newlines.
@@ -68,6 +79,6 @@ def write_file(path: Path, content: FileContent, newline: Newline) -> None:
     Intended for use with content and newline style from :func:`read_file`, so that
     newlines are correctly normalized back to their original style when writing to disk.
     """
-    content = content.replace(b"\n", newline)
+    content = normalize_result(content, newline)
     with open(path, "wb") as buf:
         buf.write(content)
