@@ -569,6 +569,24 @@ class CoreTest(TestCase):
                 self.assertEqual(f2.read_text(), CORRECTLY_FORMATTED_CODE)
                 self.assertEqual(f3.read_text(), POORLY_FORMATTED_CODE)
 
+    def test_e2e_empty_files(self):
+        with TemporaryDirectory() as td:
+            tdp = Path(td).resolve()
+            foo = tdp / "foo.py"
+            foo.write_text("")
+
+            results = list(ufmt.ufmt_paths([foo], return_content=True))
+            expected = [
+                ufmt.Result(
+                    foo,
+                    changed=False,
+                    error=None,
+                    before=b"",
+                    after=b"",
+                )
+            ]
+            self.assertListEqual(expected, results)
+
     def test_e2e_return_bytes(self):
         with TemporaryDirectory() as td:
             td = Path(td).resolve()
