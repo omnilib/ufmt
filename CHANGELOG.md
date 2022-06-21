@@ -1,6 +1,20 @@
 µfmt
 ====
 
+v2.0.0b2
+--------
+
+Beta release
+
+- Fix: sorting empty files is now handled correctly (#93)
+- Added click and libcst to deps list (#90)
+
+```
+$ git shortlog -s v2.0.0b1...v2.0.0b2
+     5	John Reese
+```
+
+
 v2.0.0b1
 --------
 
