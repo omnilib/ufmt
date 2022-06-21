@@ -11,6 +11,13 @@ from black import TargetVersion
 import ufmt
 from .core import FAKE_CONFIG, POORLY_FORMATTED_CODE
 
+FAKE_CONTENT = b"""\
+import foo
+
+def bar():
+    print("hello world")
+"""
+
 
 class UtilTest(TestCase):
     def test_black_config(self):
@@ -57,3 +64,30 @@ class UtilTest(TestCase):
 
             with self.subTest("line_length"):
                 self.assertEqual(mode.line_length, black_config["line_length"])
+
+    def test_read_file(self):
+        with TemporaryDirectory() as td:
+            tdp = Path(td).resolve()
+            foo = tdp / "foo.py"
+
+            with self.subTest("unix newlines"):
+                foo.write_bytes(FAKE_CONTENT)
+
+                result = ufmt.util.read_file(foo)
+                expected = (FAKE_CONTENT, "utf-8", b"\n")
+                self.assertTupleEqual(expected, result)
+
+            with self.subTest("windows newlines"):
+                content = FAKE_CONTENT.replace(b"\n", b"\r\n")
+                foo.write_bytes(content)
+
+                result = ufmt.util.read_file(foo)
+                expected = (FAKE_CONTENT, "utf-8", b"\r\n")
+                self.assertTupleEqual(expected, result)
+
+            with self.subTest("empty file"):
+                foo.write_bytes(b"")
+
+                result = ufmt.util.read_file(foo)
+                expected = (b"", "utf-8", b"\n")
+                self.assertTupleEqual(expected, result)

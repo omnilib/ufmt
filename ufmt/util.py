@@ -61,7 +61,7 @@ def read_file(path: Path) -> Tuple[FileContent, Encoding, Newline]:
     """
     with open(path, "rb") as buf:
         encoding, lines = tokenize.detect_encoding(buf.readline)
-        newline = b"\r\n" if lines[0].endswith(b"\r\n") else b"\n"
+        newline = b"\r\n" if lines and lines[0].endswith(b"\r\n") else b"\n"
 
         buf.seek(0)
         content = buf.read()
