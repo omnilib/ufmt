@@ -4,21 +4,22 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 import click
 from moreorless.click import echo_color_precomputed_diff
 
 from .__version__ import __version__
 from .core import Result, ufmt_paths
+from .types import Options
 
 
-def init_logging(*, debug: bool = False) -> None:
-    logging.basicConfig(
-        stream=sys.stderr,
-        level=logging.DEBUG if debug else logging.INFO,
-        format="%(message)s" if not debug else "%(levelname)s %(name)s %(message)s",
+def init_logging(*, debug: Optional[bool] = None) -> None:
+    format = "%(message)s" if not debug else "%(levelname)s %(name)s %(message)s"
+    level = (
+        logging.DEBUG if debug else (logging.INFO if debug is None else logging.ERROR)
     )
+    logging.basicConfig(stream=sys.stderr, level=level, format=format)
     logging.getLogger("blib2to3").setLevel(logging.WARNING)
 
 
@@ -58,10 +59,21 @@ def echo_results(results: Iterable[Result], diff: bool = False) -> Tuple[bool, b
 
 
 @click.group()
+@click.pass_context
 @click.version_option(__version__, "--version", "-V")
-@click.option("--debug", "-d", "-v", is_flag=True, help="Enable debug/verbose output")
-def main(debug: bool):
+@click.option(
+    "--debug/--quiet",
+    "-v/-q",
+    is_flag=True,
+    default=None,
+    help="Enable debug/verbose output",
+)
+def main(ctx: click.Context, debug: Optional[bool]):
     init_logging(debug=debug)
+    ctx.obj = Options(
+        debug=debug is True,
+        quiet=debug is False,
+    )
 
 
 @main.command()
