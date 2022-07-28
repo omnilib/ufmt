@@ -25,17 +25,8 @@ class CliTest(TestCase):
         self.runner = CliRunner(mix_stderr=False)
         self.cwd = os.getcwd()
         self.td = TemporaryDirectory()
-        td = Path(self.td.name)
-        f1 = td / "bar.py"
-        sd = td / "foo"
-        sd.mkdir()
-        f2 = sd / "baz.py"
-        f3 = sd / "frob.py"
-
-        for f in f1, f2, f3:
-            f.write_text("\n")
-
-        os.chdir(td)
+        self.tdp = Path(self.td.name)
+        os.chdir(self.tdp)
 
     def tearDown(self):
         os.chdir(self.cwd)
