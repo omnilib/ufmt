@@ -1,6 +1,23 @@
 µfmt
 ====
 
+v2.0.0rc1
+---------
+
+Release candidate:
+
+- Fix: fake stdin path now resolvable on Windows (#100)
+- Fix: skipped file message sent to stderr (#101)
+- New: final report after formatting files (#101)
+- New: `--quiet` flag for suppressing reports and non-error messages (#101)
+
+```
+$ git shortlog -s v2.0.0b2...v2.0.0rc1
+    10	John Reese
+     1	dependabot[bot]
+```
+
+
 v2.0.0b2
 --------
 
