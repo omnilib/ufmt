@@ -499,7 +499,7 @@ class CoreTest(TestCase):
         with self.subTest("no name"):
             list(ufmt.ufmt_paths([STDIN], dry_run=True))
             stdin_mock.assert_called_with(
-                Path("<stdin>"),
+                Path("stdin"),
                 dry_run=True,
                 diff=False,
                 return_content=False,
@@ -529,6 +529,24 @@ class CoreTest(TestCase):
                         [STDIN, Path("hello.py"), Path("foo.py")], dry_run=True
                     )
                 )
+
+    @patch("ufmt.core.sys.stdin")
+    @patch("ufmt.core.sys.stdout")
+    def test_ufmt_paths_stdin_resolves(self, stdout_mock, stdin_mock):
+        stdin_mock.buffer = io.BytesIO(POORLY_FORMATTED_CODE.encode())
+        stdout_mock.buffer = stdout = io.BytesIO()
+
+        def fake_preprocessor(path, content, encoding):
+            # ensure the fake path resolves correctly (#94)
+            path.resolve()
+
+        result = list(ufmt.ufmt_paths([STDIN]))
+        expected = [Result(Path("stdin"), changed=True, written=True)]
+        stdout.seek(0)
+        output = stdout.read()
+
+        self.assertListEqual(expected, result)
+        self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), output)
 
     def test_ufmt_paths_config(self):
         with TemporaryDirectory() as td:

@@ -303,7 +303,7 @@ class CliTest(TestCase):
                 input=POORLY_FORMATTED_CODE,
             )
             self.assertEqual("", result.stdout)
-            self.assertEqual("Would format <stdin>\n", result.stderr)
+            self.assertEqual("Would format stdin\n", result.stderr)
             self.assertEqual(1, result.exit_code)
 
         with self.subTest("diff clean"):
