@@ -19,6 +19,12 @@ BlackConfigFactory = Callable[[Path], BlackConfig]
 UsortConfigFactory = Callable[[Path], UsortConfig]
 
 
+@dataclass
+class Options:
+    debug: bool = False
+    quiet: bool = False
+
+
 class Processor(Protocol):
     def __call__(
         self,
