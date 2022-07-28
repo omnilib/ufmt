@@ -39,7 +39,7 @@ def echo_results(results: Iterable[Result], diff: bool = False) -> Tuple[bool, b
 
         elif result.skipped:
             reason = f": {result.skipped}" if isinstance(result.skipped, str) else ""
-            click.echo(f"Skipped {result.path}{reason}")
+            click.echo(f"Skipped {result.path}{reason}", err=True)
 
         elif result.changed:
             changed = True

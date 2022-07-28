@@ -146,7 +146,7 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["check", "foo.py"])
             ufmt_mock.assert_called_with([Path("foo.py")], dry_run=True)
-            self.assertRegex(result.stdout, r"Skipped .*foo\.py: special")
+            self.assertRegex(result.stderr, r"Skipped .*foo\.py: special")
             self.assertEqual(0, result.exit_code)
 
     @patch("ufmt.cli.ufmt_paths")
@@ -213,7 +213,7 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["diff", "foo.py"])
             ufmt_mock.assert_called_with([Path("foo.py")], dry_run=True, diff=True)
-            self.assertRegex(result.stdout, r"Skipped .*foo\.py: special")
+            self.assertRegex(result.stderr, r"Skipped .*foo\.py: special")
             self.assertEqual(0, result.exit_code)
 
     @patch("ufmt.cli.ufmt_paths")
@@ -274,7 +274,7 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["format", "foo.py"])
             ufmt_mock.assert_called_with([Path("foo.py")])
-            self.assertRegex(result.stdout, r"Skipped .*foo\.py: special")
+            self.assertRegex(result.stderr, r"Skipped .*foo\.py: special")
             self.assertEqual(0, result.exit_code)
 
     @skipIf(platform.system() == "Windows", "stderr not supported on Windows")
