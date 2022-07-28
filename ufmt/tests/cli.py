@@ -25,7 +25,7 @@ class CliTest(TestCase):
         self.runner = CliRunner(mix_stderr=False)
         self.cwd = os.getcwd()
         self.td = TemporaryDirectory()
-        self.tdp = Path(self.td.name)
+        self.tdp = Path(self.td.name).resolve()
         os.chdir(self.tdp)
 
     def tearDown(self):
@@ -340,12 +340,72 @@ class CliTest(TestCase):
             self.assertIn("Formatted hello.py\n", result.stderr)
             self.assertEqual(0, result.exit_code)
 
-        with self.subTest("format dirty quiet"):
-            result = self.runner.invoke(
-                main,
-                ["--quiet", "format", "-", "hello.py"],
-                input=POORLY_FORMATTED_CODE,
+    def test_end_to_end(self):
+        alpha = self.tdp / "alpha.py"
+        beta = self.tdp / "beta.py"
+        (self.tdp / "sub").mkdir()
+        gamma = self.tdp / "sub" / "gamma.py"
+        kappa = self.tdp / "sub" / "kappa.py"
+
+        def reset():
+            alpha.write_text(CORRECTLY_FORMATTED_CODE)
+            beta.write_text(POORLY_FORMATTED_CODE)
+            gamma.write_text(CORRECTLY_FORMATTED_CODE)
+            kappa.write_text(POORLY_FORMATTED_CODE)
+
+        with self.subTest("check"):
+            reset()
+            result = self.runner.invoke(main, ["check", self.tdp.as_posix()])
+            self.assertEqual("", result.stdout)
+            self.assertIn(f"Would format {beta}", result.stderr)
+            self.assertIn(f"Would format {kappa}", result.stderr)
+            self.assertIn(
+                "2 files would be formatted, 2 files already formatted", result.stderr
             )
-            self.assertEqual(CORRECTLY_FORMATTED_CODE, result.stdout)
+            self.assertEqual(POORLY_FORMATTED_CODE, beta.read_text())
+            self.assertEqual(POORLY_FORMATTED_CODE, kappa.read_text())
+
+        with self.subTest("diff"):
+            reset()
+            result = self.runner.invoke(main, ["diff", self.tdp.as_posix()])
+            self.assertIn(f"--- {beta.as_posix()}", result.stdout)
+            self.assertIn(f"+++ {beta.as_posix()}", result.stdout)
+            self.assertIn(f"Would format {beta}", result.stderr)
+            self.assertIn(f"--- {kappa.as_posix()}", result.stdout)
+            self.assertIn(f"+++ {kappa.as_posix()}", result.stdout)
+            self.assertIn(f"Would format {kappa}", result.stderr)
+            self.assertIn(
+                "2 files would be formatted, 2 files already formatted", result.stderr
+            )
+            self.assertEqual(POORLY_FORMATTED_CODE, beta.read_text())
+            self.assertEqual(POORLY_FORMATTED_CODE, kappa.read_text())
+
+        with self.subTest("format"):
+            reset()
+            result = self.runner.invoke(main, ["format", self.tdp.as_posix()])
+            self.assertEqual("", result.stdout)
+            self.assertIn(f"Formatted {beta}", result.stderr)
+            self.assertIn(f"Formatted {kappa}", result.stderr)
+            self.assertIn("2 files formatted, 2 files already formatted", result.stderr)
+            self.assertEqual(CORRECTLY_FORMATTED_CODE, beta.read_text())
+            self.assertEqual(CORRECTLY_FORMATTED_CODE, kappa.read_text())
+
+        with self.subTest("format quiet"):
+            reset()
+            result = self.runner.invoke(
+                main, ["--quiet", "format", self.tdp.as_posix()]
+            )
+            self.assertEqual("", result.stdout)
             self.assertEqual("", result.stderr)
-            self.assertEqual(0, result.exit_code)
+            self.assertEqual(CORRECTLY_FORMATTED_CODE, beta.read_text())
+            self.assertEqual(CORRECTLY_FORMATTED_CODE, kappa.read_text())
+
+        with self.subTest("format subdir"):
+            reset()
+            result = self.runner.invoke(main, ["format", (self.tdp / "sub").as_posix()])
+            self.assertEqual("", result.stdout)
+            self.assertNotIn(f"Formatted {beta}", result.stderr)
+            self.assertIn(f"Formatted {kappa}", result.stderr)
+            self.assertIn("1 file formatted, 1 file already formatted", result.stderr)
+            self.assertEqual(POORLY_FORMATTED_CODE, beta.read_text())
+            self.assertEqual(CORRECTLY_FORMATTED_CODE, kappa.read_text())
