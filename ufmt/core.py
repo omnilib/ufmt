@@ -353,7 +353,7 @@ def ufmt_paths(
         elif len(paths) == 2:
             _, path = paths
         else:
-            path = Path("<stdin>")
+            path = Path("stdin")
         yield ufmt_stdin(
             path,
             dry_run=dry_run,
