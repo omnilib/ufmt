@@ -42,7 +42,7 @@ class CliTest(TestCase):
         self.td.cleanup()
 
     @patch("ufmt.cli.echo_color_precomputed_diff")
-    @patch("ufmt.cli.click.echo")
+    @patch("ufmt.cli.click.secho")
     def test_echo(self, echo_mock, mol_mock):
         f1 = Path("foo/bar.py")
         f2 = Path("fuzz/buzz.py")
@@ -216,6 +216,16 @@ class CliTest(TestCase):
             self.assertRegex(result.stderr, r"Skipped .*foo\.py: special")
             self.assertEqual(0, result.exit_code)
 
+        with self.subTest("skipped file quiet"):
+            ufmt_mock.reset_mock()
+            ufmt_mock.return_value = [
+                Result(Path("foo.py"), skipped="special"),
+            ]
+            result = self.runner.invoke(main, ["--quiet", "diff", "foo.py"])
+            ufmt_mock.assert_called_with([Path("foo.py")], dry_run=True, diff=True)
+            self.assertEqual("", result.stderr)
+            self.assertEqual(0, result.exit_code)
+
     @patch("ufmt.cli.ufmt_paths")
     def test_format(self, ufmt_mock):
         with self.subTest("no paths given"):
@@ -286,7 +296,7 @@ class CliTest(TestCase):
                 input=CORRECTLY_FORMATTED_CODE,
             )
             self.assertEqual("", result.stdout)
-            self.assertEqual("", result.stderr)
+            self.assertRegex(result.stderr, r"✨ 1 file already formatted ✨")
             self.assertEqual(0, result.exit_code)
 
         with self.subTest("check dirty"):
@@ -296,7 +306,7 @@ class CliTest(TestCase):
                 input=POORLY_FORMATTED_CODE,
             )
             self.assertEqual("", result.stdout)
-            self.assertEqual("Would format stdin\n", result.stderr)
+            self.assertIn("Would format stdin\n", result.stderr)
             self.assertEqual(1, result.exit_code)
 
         with self.subTest("diff clean"):
@@ -306,7 +316,7 @@ class CliTest(TestCase):
                 input=CORRECTLY_FORMATTED_CODE,
             )
             self.assertEqual("", result.stdout)
-            self.assertEqual("", result.stderr)
+            self.assertIn("✨ 1 file already formatted ✨", result.stderr)
             self.assertEqual(0, result.exit_code)
 
         with self.subTest("diff dirty"):
@@ -316,7 +326,7 @@ class CliTest(TestCase):
                 input=POORLY_FORMATTED_CODE,
             )
             self.assertRegex(result.stdout, r"--- hello.py\n\+\+\+ hello.py")
-            self.assertEqual("Would format hello.py\n", result.stderr)
+            self.assertIn("Would format hello.py\n", result.stderr)
             self.assertEqual(1, result.exit_code)
 
         with self.subTest("format clean"):
@@ -326,7 +336,7 @@ class CliTest(TestCase):
                 input=CORRECTLY_FORMATTED_CODE,
             )
             self.assertEqual(CORRECTLY_FORMATTED_CODE, result.stdout)
-            self.assertEqual("", result.stderr)
+            self.assertIn("✨ 1 file already formatted ✨", result.stderr)
             self.assertEqual(0, result.exit_code)
 
         with self.subTest("format dirty"):
@@ -336,5 +346,15 @@ class CliTest(TestCase):
                 input=POORLY_FORMATTED_CODE,
             )
             self.assertEqual(CORRECTLY_FORMATTED_CODE, result.stdout)
-            self.assertEqual("Formatted hello.py\n", result.stderr)
+            self.assertIn("Formatted hello.py\n", result.stderr)
+            self.assertEqual(0, result.exit_code)
+
+        with self.subTest("format dirty quiet"):
+            result = self.runner.invoke(
+                main,
+                ["--quiet", "format", "-", "hello.py"],
+                input=POORLY_FORMATTED_CODE,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_CODE, result.stdout)
+            self.assertEqual("", result.stderr)
             self.assertEqual(0, result.exit_code)
