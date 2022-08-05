@@ -14,8 +14,11 @@ runs:
     - name: Install µfmt
       if: ${{ inputs.version == 'latest' }}
       run: python -m pip install ufmt
+      shell: bash
     - name: Install µfmt ${{ inputs.version }}
       if: ${{ inputs.version != 'latest' }}
       run: python -m pip install "ufmt==${{ inputs.version }}"
+      shell: bash
     - name: Check formatting
       run: ufmt check ${{ inputs.path }}
+      shell: bash
