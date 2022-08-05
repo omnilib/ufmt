@@ -63,6 +63,27 @@ $ ufmt diff <path> [<path> ...]
 ```
 
 
+Github Actions
+--------------
+
+µfmt provides a Github Action that can be added to an existing Github Actions workflow,
+or as a separate workflow or job, to enforce proper formatting in pull requests:
+
+```yaml
+name: Formatting
+on:
+  pull_request:
+jobs:
+  ufmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: omnilib/ufmt@x1
+        with:
+          path: <PATH TO CHECK>
+          python-version: "3.x"
+```
+
+
 [pre-commit] hook
 -----------------
 
