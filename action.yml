@@ -36,5 +36,5 @@ runs:
       run: python -m pip install "ufmt==${{ inputs.version }}"
       shell: bash
     - name: Check formatting
-      run: ufmt diff ${{ inputs.path }}
+      run: python -m ufmt diff ${{ inputs.path }}
       shell: bash
