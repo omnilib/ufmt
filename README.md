@@ -63,8 +63,10 @@ $ ufmt diff <path> [<path> ...]
 ```
 
 
-GitHub Actions
---------------
+Integrations
+------------
+
+### GitHub Actions
 
 µfmt provides a GitHub Action that can be added to an existing workflow,
 or as a separate workflow or job, to enforce proper formatting in pull requests:
@@ -82,11 +84,9 @@ jobs:
 
 See the [user guide](https://ufmt.omnilib.dev/en/latest/guide.html#github-actions) for details.
 
+### pre-commit hook
 
-[pre-commit] hook
------------------
-
-µfmt provides a [pre-commit] hook. To format your diff before 
+µfmt provides a [pre-commit][] hook. To format your diff before
 every commit, add the following to your `.pre-commit-config.yaml` file:
 
 ```yaml
