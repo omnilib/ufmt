@@ -19,14 +19,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install µfmt
-      if: ${{ inputs.version == 'latest' }}
-      run: python -m pip install ufmt
-      shell: bash
-    - name: Install µfmt ${{ inputs.version }}
-      if: ${{ inputs.version != 'latest' }}
-      run: python -m pip install "ufmt==${{ inputs.version }}"
-      shell: bash
     - name: Install black ${{ inputs.black_version }}
       if: ${{ inputs.black_version }}
       run: python -m pip install "black==${{ inputs.black_version }}"
@@ -34,6 +26,14 @@ runs:
     - name: Install µsort ${{ inputs.usort_version }}
       if: ${{ inputs.usort_version }}
       run: python -m pip install "usort==${{ inputs.usort_version }}"
+      shell: bash
+    - name: Install µfmt
+      if: ${{ inputs.version == 'latest' }}
+      run: python -m pip install ufmt
+      shell: bash
+    - name: Install µfmt ${{ inputs.version }}
+      if: ${{ inputs.version != 'latest' }}
+      run: python -m pip install "ufmt==${{ inputs.version }}"
       shell: bash
     - name: Check formatting
       run: ufmt diff ${{ inputs.path }}
