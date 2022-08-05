@@ -63,29 +63,43 @@ $ ufmt diff <path> [<path> ...]
 ```
 
 
-[pre-commit] hook
------------------
+Integrations
+------------
 
-µfmt provides a [pre-commit] hook. To format your diff before 
+### GitHub Actions
+
+µfmt provides a GitHub Action that can be added to an existing workflow,
+or as a separate workflow or job, to enforce proper formatting in pull requests:
+
+```yaml
+jobs:
+  ufmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: omnilib/ufmt@action-v1
+        with:
+          path: <PATH TO CHECK>
+          python-version: "3.x"
+```
+
+See the [user guide](https://ufmt.omnilib.dev/en/latest/guide.html#github-actions) for details.
+
+### pre-commit hook
+
+µfmt provides a [pre-commit][] hook. To format your diff before
 every commit, add the following to your `.pre-commit-config.yaml` file:
 
 ```yaml
   - repo: https://github.com/omnilib/ufmt
-    rev: v1.3.2
+    rev: v1.3.3
     hooks:
       - id: ufmt
-```
-
-You can change the `rev` to any version `>= 1.3.0`. To pin `black` and `usort`, use the 
-`additional_dependencies` option:
-
-```yaml
-    hooks: 
-      - id: ufmt 
         additional_dependencies: 
-          - black == 22.3.0
-          - usort == 1.0.2
+          - black == 22.6.0
+          - usort == 1.0.3
 ```
+
+See the [user guide](https://ufmt.omnilib.dev/en/latest/guide.html#pre-commit) for details.
 
 
 License
