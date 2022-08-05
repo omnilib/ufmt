@@ -1,6 +1,10 @@
 name: "µfmt"
 description: "Validate formatting and import sorting"
 inputs:
+  diff:
+    description: "Show diff output"
+    required: false
+    default: true
   path:
     description: "Paths to check"
     required: true
@@ -8,6 +12,14 @@ inputs:
     description: "µfmt version to install"
     required: false
     default: "latest"
+  black_version:
+    description: "black version to install"
+    required: false
+    default: ""
+  usort_version:
+    description: "µsort version to install"
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -19,6 +31,19 @@ runs:
       if: ${{ inputs.version != 'latest' }}
       run: python -m pip install "ufmt==${{ inputs.version }}"
       shell: bash
+    - name: Install black ${{ inputs.black_version }}
+      if: ${{ inputs.black_version }}
+      run: python -m pip install "black==${{ inputs.black_version }}"
+      shell: bash
+    - name: Install µsort ${{ inputs.usort_version }}
+      if: ${{ inputs.usort_version }}
+      run: python -m pip install "black==${{ inputs.usort_version }}"
+      shell: bash
     - name: Check formatting
+      if: ${{ inputs.diff }}
+      run: ufmt diff ${{ inputs.path }}
+      shell: bash
+    - name: Check formatting (no diff)
+      if: ${{ ! inputs.diff }}
       run: ufmt check ${{ inputs.path }}
       shell: bash
