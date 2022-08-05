@@ -87,12 +87,41 @@ already used, the :attr:`python-version` input must be specified:
               path: <PATH TO CHECK>
               python-version: "3.x"
 
+For consistent and predictable behavior in CI, it is recommended to pin your version
+of black and µsort. These can be individually configured in the workflow (see Options),
+but prefer using a requirements file with pinned versions, and the µfmt action can
+install those dependencies if they aren't already installed by a previous step:
+
+.. code-block::
+    :caption: requirements-fmt.txt
+
+    black==22.6.0
+    usort==1.0.3
+
+.. code-block:: yaml
+    :caption: .github/workflows/ufmt.yml
+
+    steps:
+      - uses: omnilib/ufmt@action-v1
+        with:
+          path: <PATH TO CHECK>
+          requirements: requirements-fmt.txt
+
+**Options**
+
 The following inputs are supported to change the way the Action is performed, and
 must be specified as part of the ``with`` section of the job step:
 
 .. attribute:: path (required)
 
     One or more paths (relative to the repository root) that should be checked.
+
+.. attribute:: requirements
+
+    Path to a requirements file (relative to repo root) that should be installed before
+    checking formatting. Any pinned version of black, µsort, or µfmt will be used,
+    unless otherwise overridden by :attr:`version`, :attr:`black-version`, or
+    :attr:`usort-version`, or incompatible with the version of µfmt requested. 
 
 .. attribute:: version
 

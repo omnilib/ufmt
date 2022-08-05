@@ -4,6 +4,10 @@ inputs:
   path:
     description: "Paths to check"
     required: true
+  requirements:
+    description: "Requirements file to install"
+    required: false
+    default: ""
   version:
     description: "µfmt version to install"
     required: false
@@ -30,6 +34,10 @@ runs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ inputs.python-version }}
+    - name: Install requirements
+      if: ${{ inputs.requirements }}
+      run: python -m pip install -r "${{ inputs.requirements }}"
+      shell: bash
     - name: Install black ${{ inputs.black-version }}
       if: ${{ inputs.black-version }}
       run: python -m pip install "black==${{ inputs.black-version }}"

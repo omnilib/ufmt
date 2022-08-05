@@ -79,6 +79,7 @@ jobs:
       - uses: omnilib/ufmt@action-v1
         with:
           path: <PATH TO CHECK>
+          requirements: requirements-fmt.txt
           python-version: "3.x"
 ```
 
