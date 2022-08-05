@@ -1,10 +1,6 @@
 name: "µfmt"
 description: "Validate formatting and import sorting"
 inputs:
-  diff:
-    description: "Show diff output"
-    required: false
-    default: true
   path:
     description: "Paths to check"
     required: true
@@ -40,10 +36,5 @@ runs:
       run: python -m pip install "usort==${{ inputs.usort_version }}"
       shell: bash
     - name: Check formatting
-      if: ${{ inputs.diff == true }}
       run: ufmt diff ${{ inputs.path }}
-      shell: bash
-    - name: Check formatting (no diff)
-      if: ${{ inputs.diff == false }}
-      run: ufmt check ${{ inputs.path }}
       shell: bash
