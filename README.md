@@ -4,8 +4,9 @@ Safe, atomic formatting with [black][] and [µsort][]
 
 [![version](https://img.shields.io/pypi/v/ufmt.svg)](https://pypi.org/project/ufmt)
 [![documentation](https://readthedocs.org/projects/ufmt/badge/?version=latest)](https://ufmt.omnilib.dev)
-[![changelog](https://img.shields.io/badge/change-log-blue)](https://ufmt.omnilib.dev/en/latest/changelog.html)
+[![changelog](https://img.shields.io/badge/change-log-lightgrey)](https://ufmt.omnilib.dev/en/latest/changelog.html)
 [![license](https://img.shields.io/pypi/l/ufmt.svg)](https://github.com/omnilib/ufmt/blob/master/LICENSE)
+[![vscode extension](https://img.shields.io/badge/vscode-extension-007ACC?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=omnilib.ufmt)
 
 µfmt is a safe, atomic code formatter for Python built on top of [black] and [µsort]:
 
@@ -101,6 +102,31 @@ every commit, add the following to your `.pre-commit-config.yaml` file:
 ```
 
 See the [user guide](https://ufmt.omnilib.dev/en/latest/guide.html#pre-commit) for details.
+
+### Visual Studio Code
+
+µfmt has an official VS Code extension to use µfmt as a formatter for Python files.
+Once installed, µfmt can be set as the default formatter with the following settings:
+
+```json
+"[python]": {
+  "editor.defaultFormatter": "omnilib.ufmt"
+}
+```
+
+µfmt can automatically format when saving with the following settings:
+
+```json
+"[python]": {
+  "editor.defaultFormatter": "omnilib.ufmt",
+  "editor.formatOnSave": true
+}
+```
+
+For more details, or to install the extension, see the Visual Studio Marketplace page:
+
+<a href="https://marketplace.visualstudio.com/items?itemName=omnilib.ufmt"><img alt="VS Code extension marketplace" src="https://img.shields.io/badge/VSCode-ufmt-007ACC?style=for-the-badge&logo=visualstudiocode" /></a>
+<a href="vscode:extension/omnilib.ufmt"><img alt="Install VS Code extension now" src="https://img.shields.io/badge/-Install%20Now-107C10?style=for-the-badge&logo=visualstudiocode" /></a>
 
 
 License

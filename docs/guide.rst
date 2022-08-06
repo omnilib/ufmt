@@ -50,6 +50,7 @@ Integrations
 
 - `GitHub Actions`_
 - `pre-commit`_
+- `Visual Studio Code`_
 
 
 GitHub Actions
@@ -182,3 +183,35 @@ pre-commit
               additional_dependencies:
                 - black == 22.6.0
                 - usort == 1.0.3
+
+
+Visual Studio Code
+~~~~~~~~~~~~~~~~~~
+
+µfmt has an official VS Code extension to use µfmt as a formatter for Python files.
+Once installed, µfmt can be set as the default formatter with the following settings:
+
+.. code-block:: json
+
+    "[python]": {
+      "editor.defaultFormatter": "omnilib.ufmt"
+    }
+
+µfmt can automatically format when saving with the following settings:
+
+.. code-block:: json
+
+    "[python]": {
+      "editor.defaultFormatter": "omnilib.ufmt",
+      "editor.formatOnSave": true
+    }
+
+For more details, or to install the extension, see the Visual Studio Marketplace page:
+
+.. image:: https://img.shields.io/badge/VSCode-ufmt-007ACC?style=for-the-badge&logo=visualstudiocode
+    :alt: VS Code extension marketplace
+    :target: https://marketplace.visualstudio.com/items?itemName=omnilib.ufmt
+
+.. image:: https://img.shields.io/badge/-Install%20Now-107C10?style=for-the-badge&logo=visualstudiocode
+    :alt: Install VS Code extension now
+    :target: vscode:extension/omnilib.ufmt
