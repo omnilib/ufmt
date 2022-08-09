@@ -97,7 +97,7 @@ install those dependencies if they aren't already installed by a previous step:
     :caption: requirements-fmt.txt
 
     black==22.6.0
-    usort==1.0.3
+    usort==1.0.4
 
 .. code-block:: yaml
     :caption: .github/workflows/ufmt.yml
@@ -166,7 +166,7 @@ pre-commit
 .. code-block:: yaml
 
     - repo: https://github.com/omnilib/ufmt
-      rev: v1.3.3
+      rev: v2.0.0
       hooks:
         - id: ufmt
 
@@ -182,7 +182,7 @@ pre-commit
             - id: ufmt
               additional_dependencies:
                 - black == 22.6.0
-                - usort == 1.0.3
+                - usort == 1.0.4
 
 
 Visual Studio Code

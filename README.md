@@ -36,9 +36,9 @@ preferred versions.
 If you use `requirements.txt`, this might look like:
 
 ```text
-black==22.3.0
-ufmt==1.3.2
-usort==1.0.2
+black==22.6.0
+ufmt==2.0.0
+usort==1.0.4
 ```
 
 
@@ -93,12 +93,12 @@ every commit, add the following to your `.pre-commit-config.yaml` file:
 
 ```yaml
   - repo: https://github.com/omnilib/ufmt
-    rev: v1.3.3
+    rev: v2.0.0
     hooks:
       - id: ufmt
         additional_dependencies: 
           - black == 22.6.0
-          - usort == 1.0.3
+          - usort == 1.0.4
 ```
 
 See the [user guide](https://ufmt.omnilib.dev/en/latest/guide.html#pre-commit) for details.
