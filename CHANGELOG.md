@@ -1,6 +1,38 @@
 µfmt
 ====
 
+v2.0.0
+------
+
+Feature release
+
+- New: Support for formatting content via stdin (#71)
+- New: Final report printed after formatting files (#101)
+- New: Added `--quiet` flag for suppressing reports and non-error messages (#101)
+- New: Support for running µfmt via GitHub Actions (#107)
+- New: Official Visual Studio Code extension for µfmt
+- New: Refactored core API for public usage (#66)
+- New: Support for passing black/µsort config factories (#66)
+- New: Support for passing pre/post-processor functions (#66, #72)
+- New: `ufmt_paths` now returns a generator yielding results as they complete (#76)
+- New: Added `return_content` flag to API to save before/after bytes on results (#75)
+- New: Allow raising `SkipFormatting` from pre/post-processors to skip file (#79)
+- Fix: Better error handling when formatting files (#68)
+- Fix: Handle CRLF newlines correctly in diff output and results (#85)
+- Fix: Added click and libcst to deps list (#90)
+- Docs: New API reference covering high- and low-level API
+- Deprecated: `ufmt_string` will be removed in v3.0, use `ufmt_bytes`
+- Breaking change: Dropped support for Python 3.6
+- Breaking change: Requires µsort >= 1.0
+- Breaking change: `ufmt_file` and `ufmt_paths` require keyword arguments
+
+```
+$ git shortlog -s action-v1...v2.0.0
+     4	John Reese
+     2	dependabot[bot]
+```
+
+
 v2.0.0rc1
 ---------
 
