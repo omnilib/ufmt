@@ -1,4 +1,4 @@
-# Copyright 2021 John Reese
+# Copyright 2022 Amethyst Reese
 # Licensed under the MIT license
 
 import unittest

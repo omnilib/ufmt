@@ -1,4 +1,4 @@
-# Copyright 2021 John Reese, Tim Hatch
+# Copyright 2022 Amethyst Reese, Tim Hatch
 # Licensed under the MIT license
 
 from pathlib import Path

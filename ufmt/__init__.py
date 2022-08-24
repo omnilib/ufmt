@@ -2,7 +2,7 @@
 Safe, atomic formatting with black and µsort
 """
 
-__author__ = "John Reese"
+__author__ = "Amethyst Reese"
 from .__version__ import __version__
 from .core import ufmt_bytes, ufmt_file, ufmt_paths, ufmt_stdin, ufmt_string
 from .types import (
