@@ -38,7 +38,7 @@ def echo_results(
         if result.error is not None:
             msg = str(result.error)
             lines = msg.splitlines()
-            msg = lines[0]
+            msg = lines[0] if lines else repr(result.error)
             click.secho(f"Error formatting {result.path}: {msg}", fg="yellow", err=True)
             error += 1
 
