@@ -44,6 +44,7 @@ exclude = [
 [tool.attribution]
 name = "µfmt"
 package = "ufmt"
+ignored_authors = ["dependabot"]
 version_file = true
 signed_tags = true
 
