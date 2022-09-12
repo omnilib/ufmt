@@ -73,6 +73,32 @@ class CliTest(TestCase):
             echo_mock.reset_mock()
             mol_mock.reset_mock()
 
+        with self.subTest("upstream exception"):
+            results = [
+                Result(f1, changed=False),
+                Result(f2, error=AssertionError()),
+                Result(f3, error=Exception("something weird happened")),
+            ]
+            echo_results(results)
+
+            echo_mock.assert_has_calls(
+                [
+                    call(
+                        f"Error formatting {f2}: AssertionError()",
+                        fg="yellow",
+                        err=True,
+                    ),
+                    call(
+                        f"Error formatting {f3}: something weird happened",
+                        fg="yellow",
+                        err=True,
+                    ),
+                ]
+            )
+            mol_mock.assert_not_called()
+            echo_mock.reset_mock()
+            mol_mock.reset_mock()
+
     @patch("ufmt.cli.ufmt_paths")
     def test_check(self, ufmt_mock):
         with self.subTest("no paths given"):
