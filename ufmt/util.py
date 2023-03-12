@@ -1,6 +1,7 @@
 # Copyright 2022 Amethyst Reese, Tim Hatch
 # Licensed under the MIT license
 
+import os
 import tokenize
 from pathlib import Path
 from typing import Tuple
@@ -82,3 +83,17 @@ def write_file(path: Path, content: FileContent, newline: Newline) -> None:
     content = normalize_result(content, newline)
     with open(path, "wb") as buf:
         buf.write(content)
+
+
+def enable_libcst_native() -> None:
+    """
+    Enable libcst native parser if available
+
+    TODO: replace with usort.util.enable_libcst_native or similar
+    """
+    try:
+        import libcst.native  # noqa: F401
+
+        os.environ["LIBCST_PARSER_TYPE"] = "native"
+    except ImportError:  # pragma: nocover
+        pass

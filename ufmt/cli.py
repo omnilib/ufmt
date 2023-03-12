@@ -12,6 +12,7 @@ from moreorless.click import echo_color_precomputed_diff
 from .__version__ import __version__
 from .core import Result, ufmt_paths
 from .types import Options
+from .util import enable_libcst_native
 
 
 def init_logging(*, debug: Optional[bool] = None) -> None:
@@ -104,6 +105,7 @@ def main(ctx: click.Context, debug: Optional[bool]):
         debug=debug is True,
         quiet=debug is False,
     )
+    enable_libcst_native()
 
 
 @main.command()
