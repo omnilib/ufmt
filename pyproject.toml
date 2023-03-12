@@ -1,14 +1,24 @@
 [build-system]
-requires = ["flit_core >=3,<4,!=3.7.0"]
+requires = ["flit_core >=3.8,<4"]
 build-backend = "flit_core.buildapi"
 
-[tool.flit.metadata]
-module = "ufmt"
-author = "Amethyst Reese"
-author-email = "amy@noswap.com"
-description-file = "README.md"
-home-page = "https://ufmt.omnilib.dev"
-requires = [
+[project]
+name = "ufmt"
+readme = "README.md"
+license = {file="LICENSE"}
+dynamic = ["version", "description"]
+authors = [
+    {name="Amethyst Reese", email="amy@n7.gg"},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+requires-python = ">=3.7"
+dependencies = [
     "black>=20.8b0",
     "click>=8.0",
     "libcst>=0.4.0",
@@ -18,22 +28,28 @@ requires = [
     "typing-extensions>=4.0",
     "usort>=1.0",
 ]
-requires-python = ">=3.7"
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Topic :: Software Development :: Version Control",
-    "Topic :: Software Development :: Documentation",
-    "Topic :: Software Development :: Version Control :: Git",
-    "Topic :: Utilities",
-    "Typing :: Typed",
+
+[project.optional-dependencies]
+dev = [
+    "attribution==1.6.2",
+    "black==22.8.0",
+    "coverage==6.4.4",
+    "flit==3.7.1",
+    "flake8==5.0.4",
+    "mypy==0.971",
+    "usort==1.0.4",
+]
+docs = [
+    "sphinx==4.3.2",
+    "sphinx-mdinclude==0.5.3",
 ]
 
-[tool.flit.metadata.urls]
+[project.urls]
+Documentation = "https://ufmt.omnilib.dev"
 Github = "https://github.com/omnilib/ufmt"
+Changelog = "https://ufmt.omnilib.dev"
 
-[tool.flit.scripts]
+[project.scripts]
 ufmt = "ufmt.cli:main"
 
 [tool.flit.sdist]

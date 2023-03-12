@@ -13,43 +13,44 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         os: [macOS-latest, ubuntu-latest, windows-latest]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
       - name: Set Up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
+          cache: pip
+          cache-dependency-path: pyproject.toml
           python-version: ${{ matrix.python-version }}
       - name: Install
         run: |
           pip install -U pip
-          pip install -Ur requirements-dev.txt
+          pip install -U .[dev]
       - name: Test
         run: make test
       - name: Lint
         run: make lint
 
-  deps:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
-        os: [ubuntu-latest]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Set Up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install
-        run: |
-          pip install -U pip
-          pip install -Ur requirements-dev.txt
-      - name: Deps
-        run: make deps
+  # deps:
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+  #       os: [ubuntu-latest]
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v1
+  #     - name: Set Up Python ${{ matrix.python-version }}
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #     - name: Install
+  #       run: |
+  #         pip install -U pip
+  #         pip install -Ur requirements-dev.txt
+  #     - name: Deps
+  #       run: make deps

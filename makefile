@@ -7,17 +7,14 @@ endif
 
 .venv:
 	python -m venv .venv
-	source $(ACTIVATE) && make setup dev
+	source $(ACTIVATE) && make install
 	echo 'run `source $(ACTIVATE)` to use virtualenv'
 
 venv: .venv
 
-dev:
-	python -m pip install -e .
-
-setup:
+install:
 	python -m pip install -U pip
-	python -m pip install -Ur requirements-dev.txt
+	python -m pip install -Ue .[dev,docs]
 
 release: lint test clean
 	flit publish
