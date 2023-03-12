@@ -45,7 +45,7 @@ Feature release
 
 ```text
 $ git shortlog -s action-v1...v2.0.0
-     4	John Reese
+     4	Amethyst Reese
      2	dependabot[bot]
 ```
 
@@ -62,7 +62,7 @@ Release candidate:
 
 ```text
 $ git shortlog -s v2.0.0b2...v2.0.0rc1
-    10	John Reese
+    10	Amethyst Reese
      1	dependabot[bot]
 ```
 
@@ -77,7 +77,7 @@ Beta release
 
 ```text
 $ git shortlog -s v2.0.0b1...v2.0.0b2
-     5	John Reese
+     5	Amethyst Reese
 ```
 
 
@@ -91,7 +91,7 @@ Beta release
 
 ```text
 $ git shortlog -s v2.0.0a4...v2.0.0b1
-     6	John Reese
+     6	Amethyst Reese
      2	dependabot[bot]
 ```
 
@@ -105,7 +105,7 @@ Alpha release
 
 ```text
 $ git shortlog -s v2.0.0a3...v2.0.0a4
-     4	John Reese
+     4	Amethyst Reese
 ```
 
 
@@ -121,7 +121,7 @@ Alpha release
 
 ```text
 $ git shortlog -s v2.0.0a2...v2.0.0a3
-    10	John Reese
+    10	Amethyst Reese
 ```
 
 
@@ -136,7 +136,7 @@ Alpha release
 
 ```text
 $ git shortlog -s v2.0.0a1...v2.0.0a2
-    15	John Reese
+    15	Amethyst Reese
 ```
 
 
@@ -155,7 +155,7 @@ Alpha release
 
 ```text
 $ git shortlog -s v1.3.3...v2.0.0a1
-    14	John Reese
+    14	Amethyst Reese
 ```
 
 
@@ -170,7 +170,7 @@ Maintenance release
 
 ```text
 $ git shortlog -s v1.3.2...v1.3.3
-    22	John Reese
+    22	Amethyst Reese
      6	dependabot[bot]
 ```
 
@@ -184,7 +184,7 @@ Maintenance release
 
 ```text
 $ git shortlog -s v1.3.1...v1.3.2
-     4	John Reese
+     4	Amethyst Reese
      7	dependabot[bot]
 ```
 
@@ -200,7 +200,7 @@ Bugfix release
 
 ```text
 $ git shortlog -s v1.3.0...v1.3.1
-    11	John Reese
+    11	Amethyst Reese
      1	Mathieu Kniewallner
     19	dependabot[bot]
 ```
@@ -220,7 +220,7 @@ Feature release
 
 ```text
 $ git shortlog -s v1.2.1...v1.3.0
-    14	John Reese
+    14	Amethyst Reese
     14	Philip Meier
 ```
 
@@ -235,7 +235,7 @@ Maintenance release
 
 ```text
 $ git shortlog -s v1.2...v1.2.1
-     4	John Reese
+     4	Amethyst Reese
 ```
 
 
@@ -250,7 +250,7 @@ Feature release
 
 ```text
 $ git shortlog -s v1.1...v1.2
-     7	John Reese
+     7	Amethyst Reese
      1	Tim Hatch
 ```
 
@@ -265,7 +265,7 @@ Feature release
 
 ```text
 $ git shortlog -s v1.0...v1.1
-     3	John Reese
+     3	Amethyst Reese
 ```
 
 
@@ -280,10 +280,11 @@ Initial release
 
 ```text
 $ git shortlog -s v1.0
-    17	John Reese
+    17	Amethyst Reese
      1	Tim Hatch
 ```
 
 [attribution-badge]:
     https://img.shields.io/badge/generated%20by-attribution-informational
 [attribution-url]: https://attribution.omnilib.dev
+
