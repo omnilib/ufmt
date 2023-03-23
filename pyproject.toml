@@ -47,7 +47,7 @@ docs = [
 [project.urls]
 Documentation = "https://ufmt.omnilib.dev"
 Github = "https://github.com/omnilib/ufmt"
-Changelog = "https://ufmt.omnilib.dev"
+Changelog = "https://ufmt.omnilib.dev/en/latest/changelog.html"
 
 [project.scripts]
 ufmt = "ufmt.cli:main"
