@@ -2,6 +2,7 @@
 # Licensed under the MIT license
 
 import io
+import warnings
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -187,6 +188,8 @@ class CoreTest(TestCase):
         black_config = BlackConfig()
         usort_config = UsortConfig()
 
+        warnings.simplefilter("ignore", DeprecationWarning)
+
         with self.subTest("changed"):
             result = ufmt.ufmt_string(
                 Path("foo.py"),
@@ -213,6 +216,11 @@ class CoreTest(TestCase):
                 usort_config=usort_config,
             )
             self.assertEqual(CORRECTLY_FORMATTED_STUB, result)
+
+        warnings.resetwarnings()
+
+        with self.subTest("version check"):
+            self.assertRegex(ufmt.__version__, r"^2\.", "remove ufmt_string in 3.0")
 
     def test_ufmt_file(self):
         with TemporaryDirectory() as td:
