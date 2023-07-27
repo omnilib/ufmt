@@ -99,11 +99,18 @@ def echo_results(
     default=None,
     help="Enable debug/verbose output",
 )
-def main(ctx: click.Context, debug: Optional[bool]):
+@click.option(
+    "--concurrency",
+    type=int,
+    default=None,
+    help="Override the default concurrency",
+)
+def main(ctx: click.Context, debug: Optional[bool], concurrency: Optional[int]):
     init_logging(debug=debug)
     ctx.obj = Options(
         debug=debug is True,
         quiet=debug is False,
+        concurrency=concurrency,
     )
     enable_libcst_native()
 
@@ -117,7 +124,7 @@ def check(ctx: click.Context, names: List[str]):
     """Check formatting of one or more paths"""
     options: Options = ctx.obj
     paths = [Path(name) for name in names] if names else [Path(".")]
-    results = ufmt_paths(paths, dry_run=True)
+    results = ufmt_paths(paths, dry_run=True, concurrency=options.concurrency)
     changed, error = echo_results(results, quiet=options.quiet)
     if changed or error:
         ctx.exit(1)
@@ -132,7 +139,9 @@ def diff(ctx: click.Context, names: List[str]):
     """Generate diffs for any files that need formatting"""
     options: Options = ctx.obj
     paths = [Path(name) for name in names] if names else [Path(".")]
-    results = ufmt_paths(paths, dry_run=True, diff=True)
+    results = ufmt_paths(
+        paths, dry_run=True, diff=True, concurrency=options.concurrency
+    )
     changed, error = echo_results(results, diff=True, quiet=options.quiet)
     if changed or error:
         ctx.exit(1)
@@ -147,7 +156,7 @@ def format(ctx: click.Context, names: List[str]):
     """Format one or more paths in place"""
     options: Options = ctx.obj
     paths = [Path(name) for name in names] if names else [Path(".")]
-    results = ufmt_paths(paths)
+    results = ufmt_paths(paths, concurrency=options.concurrency)
     _, error = echo_results(results, quiet=options.quiet)
     if error:
         ctx.exit(1)

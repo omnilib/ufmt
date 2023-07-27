@@ -315,6 +315,7 @@ def ufmt_paths(
     usort_config_factory: Optional[UsortConfigFactory] = None,
     pre_processor: Optional[Processor] = None,
     post_processor: Optional[Processor] = None,
+    concurrency: Optional[int] = None,
 ) -> Generator[Result, None, None]:
     """
     Format one or more paths, recursively, ignoring any files excluded by configuration.
@@ -367,7 +368,9 @@ def ufmt_paths(
         return
 
     all_paths: List[Path] = []
-    runner = Trailrunner()
+    runner = (
+        Trailrunner() if concurrency is None else Trailrunner(concurrency=concurrency)
+    )
     for path in paths:
         if path == STDIN:
             LOG.warning("Cannot mix stdin ('-') with normal paths, ignoring")
