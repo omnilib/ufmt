@@ -37,7 +37,7 @@ dev = [
     "flit==3.7.1",
     "flake8==5.0.4",
     "mypy==1.1.1",
-    "usort==1.0.5",
+    "usort==1.0.7",
 ]
 docs = [
     "sphinx==6.1.3",
