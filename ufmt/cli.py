@@ -62,10 +62,6 @@ def echo_results(
         else:
             clean += 1
 
-    if empty:
-        click.secho("No files found", fg="yellow", err=True)
-        error += 1
-
     if not quiet:
 
         def f(v: int) -> str:
@@ -83,8 +79,11 @@ def echo_results(
         if clean:
             reports += [click.style(f"{clean} {f(clean)} already formatted")]
 
-        message = ", ".join(reports)
-        click.secho(f"✨ {message} ✨", err=True)
+        if empty:
+            click.secho("❗️ No files found ❗️", fg="yellow", err=True)
+        else:
+            message = ", ".join(reports)
+            click.secho(f"✨ {message} ✨", err=True)
 
     return (changed + written), error
 

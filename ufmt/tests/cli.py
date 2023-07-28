@@ -107,7 +107,7 @@ class CliTest(TestCase):
             result = self.runner.invoke(main, ["check"])
             ufmt_mock.assert_called_with([Path(".")], dry_run=True)
             self.assertRegex(result.stderr, r"No files found")
-            self.assertEqual(1, result.exit_code)
+            self.assertEqual(0, result.exit_code)
 
         with self.subTest("already formatted"):
             ufmt_mock.reset_mock()
@@ -174,7 +174,7 @@ class CliTest(TestCase):
             result = self.runner.invoke(main, ["diff"])
             ufmt_mock.assert_called_with([Path(".")], dry_run=True, diff=True)
             self.assertRegex(result.stderr, r"No files found")
-            self.assertEqual(1, result.exit_code)
+            self.assertEqual(0, result.exit_code)
 
         with self.subTest("already formatted"):
             ufmt_mock.reset_mock()
@@ -251,7 +251,7 @@ class CliTest(TestCase):
             result = self.runner.invoke(main, ["format"])
             ufmt_mock.assert_called_with([Path(".")])
             self.assertRegex(result.stderr, r"No files found")
-            self.assertEqual(1, result.exit_code)
+            self.assertEqual(0, result.exit_code)
 
         with self.subTest("already formatted"):
             ufmt_mock.reset_mock()
