@@ -34,7 +34,7 @@ dev = [
     "attribution==1.6.2",
     "black==23.1.0",
     "coverage==7.2.1",
-    "flit==3.7.1",
+    "flit==3.9.0",
     "flake8==5.0.4",
     "mypy==1.1.1",
     "usort==1.0.7",
