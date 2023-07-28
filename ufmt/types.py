@@ -23,6 +23,7 @@ UsortConfigFactory = Callable[[Path], UsortConfig]
 class Options:
     debug: bool = False
     quiet: bool = False
+    concurrency: Optional[int] = None
 
 
 class Processor(Protocol):
