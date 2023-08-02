@@ -17,7 +17,7 @@ classifiers = [
     "Topic :: Utilities",
     "Typing :: Typed",
 ]
-requires-python = ">=3.7"
+requires-python = ">= 3.8"
 dependencies = [
     "black>=20.8b0",
     "click>=8.0",
@@ -77,7 +77,7 @@ show_missing = true
 skip_covered = true
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.8"
 # strict = true
 ignore_missing_imports = true
 
@@ -85,7 +85,7 @@ ignore_missing_imports = true
 default = ["docs", "test", "lint", "coverage"]
 module = "ufmt"
 srcs = "ufmt"
-python_versions = ["3.7", "3.8", "3.9", "3.10"]
+python_versions = ["3.8", "3.9", "3.10"]
 watch_paths = ["README.md", "docs", "ufmt"]
 
 [tool.thx.jobs]
