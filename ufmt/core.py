@@ -316,6 +316,7 @@ def ufmt_paths(
     pre_processor: Optional[Processor] = None,
     post_processor: Optional[Processor] = None,
     concurrency: Optional[int] = None,
+    root: Optional[Path] = None,
 ) -> Generator[Result, None, None]:
     """
     Format one or more paths, recursively, ignoring any files excluded by configuration.
@@ -375,7 +376,7 @@ def ufmt_paths(
         if path == STDIN:
             LOG.warning("Cannot mix stdin ('-') with normal paths, ignoring")
             continue
-        config = ufmt_config(path)
+        config = ufmt_config(path, root)
         all_paths.extend(runner.walk(path, excludes=config.excludes))
 
     if not all_paths:

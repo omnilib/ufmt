@@ -105,7 +105,9 @@ class CliTest(TestCase):
             ufmt_mock.reset_mock()
             ufmt_mock.return_value = []
             result = self.runner.invoke(main, ["check"])
-            ufmt_mock.assert_called_with([Path(".")], dry_run=True, concurrency=None)
+            ufmt_mock.assert_called_with(
+                [Path(".")], dry_run=True, concurrency=None, root=None
+            )
             self.assertRegex(result.stderr, r"No files found")
             self.assertEqual(0, result.exit_code)
 
@@ -117,7 +119,10 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["check", "bar.py", "foo/frob.py"])
             ufmt_mock.assert_called_with(
-                [Path("bar.py"), Path("foo/frob.py")], dry_run=True, concurrency=None
+                [Path("bar.py"), Path("foo/frob.py")],
+                dry_run=True,
+                concurrency=None,
+                root=None,
             )
             self.assertEqual(0, result.exit_code)
 
@@ -129,7 +134,10 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["check", "bar.py", "foo/frob.py"])
             ufmt_mock.assert_called_with(
-                [Path("bar.py"), Path("foo/frob.py")], dry_run=True, concurrency=None
+                [Path("bar.py"), Path("foo/frob.py")],
+                dry_run=True,
+                concurrency=None,
+                root=None,
             )
             self.assertEqual(1, result.exit_code)
 
@@ -149,7 +157,10 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["check", "bar.py", "foo/frob.py"])
             ufmt_mock.assert_called_with(
-                [Path("bar.py"), Path("foo/frob.py")], dry_run=True, concurrency=None
+                [Path("bar.py"), Path("foo/frob.py")],
+                dry_run=True,
+                concurrency=None,
+                root=None,
             )
             self.assertRegex(
                 result.stderr, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
@@ -163,7 +174,7 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["check", "foo.py"])
             ufmt_mock.assert_called_with(
-                [Path("foo.py")], dry_run=True, concurrency=None
+                [Path("foo.py")], dry_run=True, concurrency=None, root=None
             )
             self.assertRegex(result.stderr, r"Skipped .*foo\.py: special")
             self.assertEqual(0, result.exit_code)
@@ -175,7 +186,7 @@ class CliTest(TestCase):
             ufmt_mock.return_value = []
             result = self.runner.invoke(main, ["diff"])
             ufmt_mock.assert_called_with(
-                [Path(".")], dry_run=True, diff=True, concurrency=None
+                [Path(".")], dry_run=True, diff=True, concurrency=None, root=None
             )
             self.assertRegex(result.stderr, r"No files found")
             self.assertEqual(0, result.exit_code)
@@ -192,6 +203,7 @@ class CliTest(TestCase):
                 dry_run=True,
                 diff=True,
                 concurrency=None,
+                root=None,
             )
             self.assertEqual(0, result.exit_code)
 
@@ -207,6 +219,7 @@ class CliTest(TestCase):
                 dry_run=True,
                 diff=True,
                 concurrency=None,
+                root=None,
             )
             self.assertEqual(1, result.exit_code)
 
@@ -230,6 +243,7 @@ class CliTest(TestCase):
                 dry_run=True,
                 diff=True,
                 concurrency=None,
+                root=None,
             )
             self.assertRegex(
                 result.stderr, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
@@ -243,7 +257,7 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["diff", "foo.py"])
             ufmt_mock.assert_called_with(
-                [Path("foo.py")], dry_run=True, diff=True, concurrency=None
+                [Path("foo.py")], dry_run=True, diff=True, concurrency=None, root=None
             )
             self.assertRegex(result.stderr, r"Skipped .*foo\.py: special")
             self.assertEqual(0, result.exit_code)
@@ -255,10 +269,24 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["--quiet", "diff", "foo.py"])
             ufmt_mock.assert_called_with(
-                [Path("foo.py")], dry_run=True, diff=True, concurrency=None
+                [Path("foo.py")], dry_run=True, diff=True, concurrency=None, root=None
             )
             self.assertEqual("", result.stderr)
             self.assertEqual(0, result.exit_code)
+
+        with self.subTest("bad root dir"):
+            ufmt_mock.reset_mock()
+            ufmt_mock.return_value = [
+                Result(Path("bar.py"), changed=False),
+            ]
+            result = self.runner.invoke(
+                main, ["--root", "DOES_NOT_EXIST", "diff", "bar.py"]
+            )
+            self.assertRegex(
+                result.exception.args[0],
+                r"Root must be a valid directory",
+            )
+            self.assertEqual(1, result.exit_code)
 
     @patch("ufmt.cli.ufmt_paths")
     def test_format(self, ufmt_mock):
@@ -266,7 +294,7 @@ class CliTest(TestCase):
             ufmt_mock.reset_mock()
             ufmt_mock.return_value = []
             result = self.runner.invoke(main, ["format"])
-            ufmt_mock.assert_called_with([Path(".")], concurrency=None)
+            ufmt_mock.assert_called_with([Path(".")], concurrency=None, root=None)
             self.assertRegex(result.stderr, r"No files found")
             self.assertEqual(0, result.exit_code)
 
@@ -278,7 +306,7 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["format", "bar.py", "foo/frob.py"])
             ufmt_mock.assert_called_with(
-                [Path("bar.py"), Path("foo/frob.py")], concurrency=None
+                [Path("bar.py"), Path("foo/frob.py")], concurrency=None, root=None
             )
             self.assertEqual(0, result.exit_code)
 
@@ -290,7 +318,7 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["format", "bar.py", "foo/frob.py"])
             ufmt_mock.assert_called_with(
-                [Path("bar.py"), Path("foo/frob.py")], concurrency=None
+                [Path("bar.py"), Path("foo/frob.py")], concurrency=None, root=None
             )
             self.assertEqual(0, result.exit_code)
 
@@ -310,7 +338,7 @@ class CliTest(TestCase):
             ]
             result = self.runner.invoke(main, ["format", "bar.py", "foo/frob.py"])
             ufmt_mock.assert_called_with(
-                [Path("bar.py"), Path("foo/frob.py")], concurrency=None
+                [Path("bar.py"), Path("foo/frob.py")], concurrency=None, root=None
             )
             self.assertRegex(
                 result.stderr, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
@@ -323,7 +351,7 @@ class CliTest(TestCase):
                 Result(Path("foo.py"), skipped="special"),
             ]
             result = self.runner.invoke(main, ["format", "foo.py"])
-            ufmt_mock.assert_called_with([Path("foo.py")], concurrency=None)
+            ufmt_mock.assert_called_with([Path("foo.py")], concurrency=None, root=None)
             self.assertRegex(result.stderr, r"Skipped .*foo\.py: special")
             self.assertEqual(0, result.exit_code)
 

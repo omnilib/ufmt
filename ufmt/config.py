@@ -18,9 +18,10 @@ class UfmtConfig:
     excludes: List[str] = field(default_factory=list)
 
 
-def ufmt_config(path: Optional[Path] = None) -> UfmtConfig:
+def ufmt_config(path: Optional[Path] = None, root: Optional[Path] = None) -> UfmtConfig:
     path = path or Path.cwd()
-    root = project_root(path)
+    if root is None:
+        root = project_root(path)
     config_path = root / "pyproject.toml"
     if config_path.is_file():
         pyproject = tomlkit.loads(config_path.read_text())
