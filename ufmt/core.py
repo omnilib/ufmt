@@ -6,9 +6,10 @@ import re
 import sys
 from dataclasses import replace
 from functools import partial
+from itertools import chain
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Generator, List, Match, Optional, Sequence
+from typing import Generator, Match, Optional, Sequence
 from warnings import warn
 
 from black import format_file_contents, NothingChanged
@@ -368,19 +369,20 @@ def ufmt_paths(
         )
         return
 
-    all_paths: List[Path] = []
     runner = (
         Trailrunner() if concurrency is None else Trailrunner(concurrency=concurrency)
     )
-    for path in paths:
-        if path == STDIN:
-            LOG.warning("Cannot mix stdin ('-') with normal paths, ignoring")
-            continue
-        config = ufmt_config(path, root)
-        all_paths.extend(runner.walk(path, excludes=config.excludes))
 
-    if not all_paths:
-        return
+    def generate_paths() -> Generator[Path, None, None]:
+        """
+        yield paths to format, using trailrunner to walk directories and exclude paths
+        """
+        for path in paths:
+            if path == STDIN:
+                LOG.warning("Cannot mix stdin ('-') with normal paths, ignoring")
+                continue
+            config = ufmt_config(path, root)
+            yield from runner.walk(path, excludes=config.excludes)
 
     fn = partial(
         ufmt_file,
@@ -392,8 +394,35 @@ def ufmt_paths(
         pre_processor=pre_processor,
         post_processor=post_processor,
     )
-    if len(all_paths) > 1:
-        for _, result in runner.run_iter(all_paths, fn):
-            yield result
-    else:
-        yield fn(all_paths[0])  # skip multiprocessing for a single path
+
+    # we have a generator that yields paths to format, but for large lists of paths
+    # or large directories, we want to start formatting files as soon as possible rather
+    # than waiting to finish generating the entire set of paths. we also want to skip
+    # using a process pool for the base case where we only need to format a single file.
+    #
+    # we do this here by manually pumping the generator twice, and either exit early
+    # if the first pump yields nothing (no paths to format), or immediately format
+    # the first item in the same process if the second pump yields nothing (only one
+    # path to format). Otherwise, we fall through and pass the first and second items,
+    # plus the entire rest of the generator, to trailrunner to format everything using
+    # the process pool, yielding more paths from the generator on the main process
+    # while the child processes start formatting paths.
+
+    gen = generate_paths()
+
+    try:
+        first = next(gen)
+    except StopIteration:  # no paths to format
+        return
+
+    try:
+        second = next(gen)
+    except StopIteration:  # only one path to format
+        # skip multiprocessing for a single path
+        yield fn(first)
+        return
+
+    # multiple paths to format
+    combined = chain([first, second], gen)  # combine first, second, and the rest
+    for _, result in runner.run_iter(combined, fn):
+        yield result
