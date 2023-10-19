@@ -282,11 +282,11 @@ class CliTest(TestCase):
             result = self.runner.invoke(
                 main, ["--root", "DOES_NOT_EXIST", "diff", "bar.py"]
             )
-            self.assertRegex(
-                result.exception.args[0],
-                r"Root must be a valid directory",
+            self.assertIn(
+                r"Directory 'DOES_NOT_EXIST' does not exist",
+                result.stderr,
             )
-            self.assertEqual(1, result.exit_code)
+            self.assertEqual(2, result.exit_code)
 
     @patch("ufmt.cli.ufmt_paths")
     def test_format(self, ufmt_mock):

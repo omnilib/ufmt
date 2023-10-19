@@ -106,7 +106,7 @@ def echo_results(
 )
 @click.option(
     "--root",
-    type=str,
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
     default=None,
     help="Specify the root directory for project configuration",
 )
@@ -114,18 +114,15 @@ def main(
     ctx: click.Context,
     debug: Optional[bool],
     concurrency: Optional[int],
-    root: Optional[str],
+    root: Optional[Path],
 ):
     init_logging(debug=debug)
-    root_dir = Path(root) if root is not None else None
-    if root_dir is not None and not root_dir.is_dir():
-        raise ValueError("Root must be a valid directory")
 
     ctx.obj = Options(
         debug=debug is True,
         quiet=debug is False,
         concurrency=concurrency,
-        root=root_dir,
+        root=root,
     )
     enable_libcst_native()
 
