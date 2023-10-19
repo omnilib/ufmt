@@ -24,6 +24,7 @@ class Options:
     debug: bool = False
     quiet: bool = False
     concurrency: Optional[int] = None
+    root: Optional[Path] = None
 
 
 class Processor(Protocol):

@@ -95,6 +95,17 @@ class ConfigTest(TestCase):
                     config,
                 )
 
+        with self.subTest("absolute path, manually specify project root"):
+            config = ufmt_config(root=self.td)
+            self.assertEqual(
+                UfmtConfig(
+                    project_root=self.td,
+                    pyproject_path=self.pyproject,
+                    excludes=["a", "b"],
+                ),
+                config,
+            )
+
     @patch("ufmt.config.LOG")
     def test_invalid_config(self, log_mock):
         with self.subTest("string"):

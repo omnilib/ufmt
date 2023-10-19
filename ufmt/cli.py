@@ -104,12 +104,25 @@ def echo_results(
     default=None,
     help="Override the default concurrency",
 )
-def main(ctx: click.Context, debug: Optional[bool], concurrency: Optional[int]):
+@click.option(
+    "--root",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=None,
+    help="Specify the root directory for project configuration",
+)
+def main(
+    ctx: click.Context,
+    debug: Optional[bool],
+    concurrency: Optional[int],
+    root: Optional[Path],
+):
     init_logging(debug=debug)
+
     ctx.obj = Options(
         debug=debug is True,
         quiet=debug is False,
         concurrency=concurrency,
+        root=root,
     )
     enable_libcst_native()
 
@@ -123,7 +136,9 @@ def check(ctx: click.Context, names: List[str]):
     """Check formatting of one or more paths"""
     options: Options = ctx.obj
     paths = [Path(name) for name in names] if names else [Path(".")]
-    results = ufmt_paths(paths, dry_run=True, concurrency=options.concurrency)
+    results = ufmt_paths(
+        paths, dry_run=True, concurrency=options.concurrency, root=options.root
+    )
     changed, error = echo_results(results, quiet=options.quiet)
     if changed or error:
         ctx.exit(1)
@@ -139,7 +154,11 @@ def diff(ctx: click.Context, names: List[str]):
     options: Options = ctx.obj
     paths = [Path(name) for name in names] if names else [Path(".")]
     results = ufmt_paths(
-        paths, dry_run=True, diff=True, concurrency=options.concurrency
+        paths,
+        dry_run=True,
+        diff=True,
+        concurrency=options.concurrency,
+        root=options.root,
     )
     changed, error = echo_results(results, diff=True, quiet=options.quiet)
     if changed or error:
@@ -155,7 +174,7 @@ def format(ctx: click.Context, names: List[str]):
     """Format one or more paths in place"""
     options: Options = ctx.obj
     paths = [Path(name) for name in names] if names else [Path(".")]
-    results = ufmt_paths(paths, concurrency=options.concurrency)
+    results = ufmt_paths(paths, concurrency=options.concurrency, root=options.root)
     _, error = echo_results(results, quiet=options.quiet)
     if error:
         ctx.exit(1)
