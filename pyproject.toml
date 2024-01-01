@@ -33,7 +33,7 @@ dependencies = [
 dev = [
     "attribution==1.6.2",
     "black==23.12.1",
-    "coverage==7.3.2",
+    "coverage==7.4.0",
     "flit==3.9.0",
     "flake8==6.1.0",
     "mypy==1.7.1",
