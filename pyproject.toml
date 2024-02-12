@@ -36,7 +36,7 @@ dev = [
     "coverage==7.4.1",
     "flit==3.9.0",
     "flake8==7.0.0",
-    "mypy==1.7.1",
+    "mypy==1.8.0",
     "usort==1.0.7",
 ]
 docs = [
