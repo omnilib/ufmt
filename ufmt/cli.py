@@ -64,12 +64,14 @@ def echo_results(
 
     if not quiet:
 
-        def f(v: int) -> str:
-            return "file" if v == 1 else "files"
+        def f(v: int, word: str = "file") -> str:
+            return word if v == 1 else word + "s"
 
         reports = []
         if error:
-            reports += [click.style(f"{error} errors", fg="yellow", bold=True)]
+            reports += [
+                click.style(f"{error} {f(error, 'error')}", fg="yellow", bold=True)
+            ]
         if changed:
             reports += [
                 click.style(f"{changed} {f(changed)} would be formatted", bold=True)
