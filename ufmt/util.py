@@ -2,13 +2,17 @@
 # Licensed under the MIT license
 
 import os
+import sqlite3
+import time
 import tokenize
+import zlib
+from contextlib import closing
 from pathlib import Path
-from typing import Tuple
+from typing import Optional, Tuple
 
 from black import find_pyproject_toml, parse_pyproject_toml, TargetVersion
 
-from .types import BlackConfig, Encoding, FileContent, Newline
+from .types import BlackConfig, Encoding, FileContent, Newline, SkipFormatting
 
 
 def make_black_config(path: Path) -> BlackConfig:
@@ -97,3 +101,68 @@ def enable_libcst_native() -> None:
         os.environ["LIBCST_PARSER_TYPE"] = "native"
     except ImportError:  # pragma: nocover
         pass
+
+
+class ResultCache:
+    def __init__(
+        self,
+        cache_path: Optional[Path] = None,
+        threshold: int = 7 * 86400,
+    ) -> None:
+        if cache_path is None:
+            cache_path = Path.cwd() / ".ufmt_cache" / "cache.db"
+            cache_path.parent.mkdir(exist_ok=True)
+        self.cache_path = cache_path
+        self.threshold = threshold
+
+    def prepare(self) -> None:
+        with closing(sqlite3.connect(self.cache_path)) as db:
+            with db:
+                db.execute(
+                    """
+                    create table if not exists clean (
+                        `path` text,
+                        `crc` integer,
+                        `seen` integer,
+                        unique(`path`, `crc`)
+                    )"""
+                )
+
+    def cleanup(self) -> None:
+        with closing(sqlite3.connect(self.cache_path)) as db:
+            with db:
+                db.execute(
+                    """
+                    delete from clean where rowid in (
+                        select rowid from clean where `seen` < ?
+                    )
+                    """,
+                    (int(time.time()) - self.threshold,),
+                )
+
+    def check(self, path: Path, content: FileContent) -> bool:
+        path_str = path.as_posix()
+        crc = zlib.adler32(content)
+        with closing(sqlite3.connect(self.cache_path)) as db:
+            with db:
+                cursor = db.execute(
+                    "select * from clean where `path` = ? and `crc` = ?",
+                    (path_str, crc),
+                )
+                if cursor.fetchone():
+                    db.execute(
+                        "update clean set `seen` = ? where `path` = ? and `crc` = ?",
+                        (int(time.time()), path_str, crc),
+                    )
+                    return True
+        return False
+
+    def mark(self, path: Path, content: FileContent) -> None:
+        path_str = path.as_posix()
+        crc = zlib.adler32(content)
+        with closing(sqlite3.connect(self.cache_path)) as db:
+            with db:
+                db.execute(
+                    "insert into clean (`path`, `crc`, `seen`) values (?, ?, ?) on conflict (`path`, `crc`) do update set `seen` = excluded.`seen`",
+                    (path_str, crc, int(time.time())),
+                )

@@ -25,11 +25,13 @@ from ufmt.types import (
 )
 
 FAKE_CONFIG = """
+
 [tool.ufmt]
 excludes = [
     "foo/frob/",
     "__init__.py",
 ]
+
 """
 
 POORLY_FORMATTED_CODE = """\

@@ -30,7 +30,13 @@ from .types import (
     UsortConfig,
     UsortConfigFactory,
 )
-from .util import make_black_config, normalize_result, read_file, write_file
+from .util import (
+    make_black_config,
+    normalize_result,
+    read_file,
+    ResultCache,
+    write_file,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -184,24 +190,28 @@ def ufmt_file(
     the skip exception, or ``True`` if no message is given.
     """
     path = path.resolve()
-    black_config = (black_config_factory or make_black_config)(path)
-    usort_config = (usort_config_factory or UsortConfig.find)(path)
-
     LOG.debug(f"Checking {path}")
 
+    cache = ResultCache()
     result = Result(path)
 
     try:
         src_contents, encoding, newline = read_file(path)
-        dst_contents = ufmt_bytes(
-            path,
-            src_contents,
-            encoding=encoding,
-            black_config=black_config,
-            usort_config=usort_config,
-            pre_processor=pre_processor,
-            post_processor=post_processor,
-        )
+        if cache.check(path, src_contents):
+            result.cached = True
+            dst_contents = src_contents
+        else:
+            black_config = (black_config_factory or make_black_config)(path)
+            usort_config = (usort_config_factory or UsortConfig.find)(path)
+            dst_contents = ufmt_bytes(
+                path,
+                src_contents,
+                encoding=encoding,
+                black_config=black_config,
+                usort_config=usort_config,
+                pre_processor=pre_processor,
+                post_processor=post_processor,
+            )
     except SkipFormatting as e:
         dst_contents = src_contents
         result.skipped = str(e) or True
@@ -219,7 +229,13 @@ def ufmt_file(
             result.before = src_result
             result.after = dst_result
 
-    if src_contents != dst_contents:
+    if result.cached:
+        pass
+
+    elif src_contents == dst_contents:
+        cache.mark(path, src_contents)
+
+    else:
         result.changed = True
 
         if diff:
@@ -234,6 +250,7 @@ def ufmt_file(
             try:
                 write_file(path, dst_contents, newline=newline)
                 result.written = True
+                cache.mark(path, dst_contents)
             except Exception as e:
                 result.error = e
 
@@ -373,6 +390,9 @@ def ufmt_paths(
         Trailrunner() if concurrency is None else Trailrunner(concurrency=concurrency)
     )
 
+    cache = ResultCache()
+    cache.prepare()
+
     def generate_paths() -> Generator[Path, None, None]:
         """
         yield paths to format, using trailrunner to walk directories and exclude paths
@@ -382,7 +402,13 @@ def ufmt_paths(
                 LOG.warning("Cannot mix stdin ('-') with normal paths, ignoring")
                 continue
             config = ufmt_config(path, root)
-            yield from runner.walk(path, excludes=config.excludes)
+            for p in runner.walk(path, excludes=config.excludes):
+                p = p.resolve()
+                content, _, _ = read_file(p)
+                if cache.check(p, content):
+                    continue
+
+                yield p
 
     fn = partial(
         ufmt_file,
@@ -426,3 +452,5 @@ def ufmt_paths(
     combined = chain([first, second], gen)  # combine first, second, and the rest
     for _, result in runner.run_iter(combined, fn):
         yield result
+
+    cache.cleanup()

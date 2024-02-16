@@ -54,6 +54,7 @@ class Result:
     path: Path
     changed: bool = False
     written: bool = False
+    cached: bool = False
     skipped: Union[bool, str] = False
     diff: Optional[str] = None
     error: Optional[Exception] = None
