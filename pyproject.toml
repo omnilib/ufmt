@@ -31,7 +31,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "attribution==1.6.2",
+    "attribution==1.7.0",
     "black==24.2.0",
     "coverage==7.4.1",
     "flit==3.9.0",
