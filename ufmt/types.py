@@ -22,7 +22,7 @@ UsortConfigFactory = Callable[[Path], UsortConfig]
 
 class Formatter(Enum):
     """
-    Experimental: select alternative formatters
+    Select preferred formatter implementation.
     """
 
     black = "black"
@@ -30,7 +30,13 @@ class Formatter(Enum):
 
     ruff_api = "ruff-api"
     """
-    Use Ruff via experimental `ruff-api <https://pypi.org/project/ruff-api>`_ extension.
+    **Experimental:**
+    Use Ruff via unofficial `ruff-api <https://pypi.org/project/ruff-api>`_ extension.
+
+    .. note::
+        This implementation still depends on and uses the ``[tool.black]`` configuration
+        table from ``pyproject.toml`` rather than Ruff's own configuration options.
+        This may change in future updates.
     """
 
 
