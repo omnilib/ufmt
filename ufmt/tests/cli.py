@@ -343,6 +343,7 @@ class CliTest(TestCase):
             self.assertRegex(
                 result.stderr, r"Error formatting .*frob\.py: Syntax Error @ 4:16"
             )
+            self.assertRegex(result.stderr, " 1 error, 1 file already formatted")
             self.assertEqual(1, result.exit_code)
 
         with self.subTest("skipped file"):
