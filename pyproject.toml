@@ -30,6 +30,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+ruff = [
+    "ruff-api>=0.0.1",
+]
 dev = [
     "attribution==1.7.0",
     "black==24.2.0",

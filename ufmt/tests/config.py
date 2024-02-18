@@ -22,6 +22,10 @@ class ConfigTest(TestCase):
         self.td = Path(self._td.name).resolve()
         self.pyproject = self.td / "pyproject.toml"
 
+    def subTest(self, *args, **kwargs):
+        ufmt_config.cache_clear()
+        return super().subTest(*args, **kwargs)
+
     def test_ufmt_config(self):
         fake_config = dedent(
             """
@@ -158,6 +162,20 @@ class ConfigTest(TestCase):
                 ANY, self.pyproject, ["hello_world", "unknown_element"]
             )
             log_mock.reset_mock()
+
+        with self.subTest("unsupported formatter"):
+            self.pyproject.write_text(
+                dedent(
+                    """
+                    [tool.ufmt]
+                    formatter = "garbage"
+                    """
+                )
+            )
+            with self.assertRaisesRegex(
+                ValueError, "'garbage' is not a valid Formatter"
+            ):
+                ufmt_config(self.td / "fake.py")
 
     @patch("ufmt.config.LOG")
     def test_config_excludes(self, log_mock):

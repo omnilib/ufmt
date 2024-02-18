@@ -45,6 +45,8 @@ Low-level API
 
 .. autoclass:: ufmt.Newline
 
+.. autoclass:: ufmt.types.Formatter
+
 .. autofunction:: ufmt.ufmt_bytes
 
 .. autofunction:: ufmt.ufmt_stdin

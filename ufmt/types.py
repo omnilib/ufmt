@@ -2,6 +2,7 @@
 # Licensed under the MIT license
 
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Callable, Optional, Union
 
@@ -17,6 +18,20 @@ Newline = bytes
 
 BlackConfigFactory = Callable[[Path], BlackConfig]
 UsortConfigFactory = Callable[[Path], UsortConfig]
+
+
+class Formatter(Enum):
+    """
+    Experimental: select alternative formatters
+    """
+
+    black = "black"
+    """Use black (default)."""
+
+    ruff_api = "ruff-api"
+    """
+    Use Ruff via experimental `ruff-api <https://pypi.org/project/ruff-api>`_ extension.
+    """
 
 
 @dataclass

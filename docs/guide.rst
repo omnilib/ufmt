@@ -19,6 +19,7 @@ Options available are described as follows:
 
 .. attribute:: excludes
     :type: List[str]
+    :value: []
 
     Optional list of supplemental patterns of file paths to exclude from formatting.
     Each element must be a string following "gitignore" style matching rules. These
@@ -41,6 +42,25 @@ Options available are described as follows:
     * :file:`bar/fizz.py`
     * :file:`foo/buzz.py`
     * :file:`foo/bar/baz.py`
+
+**Experimental** options may be removed or unsupported in future releases:
+
+.. attribute:: formatter
+    :type: str
+    :value: "black"
+
+    **Experimental** option to use an alternative formatter instead of black.
+    Changing this selection is likely to generate different formatting results
+    as compared to black, especially depending on available or pinned versions
+    of each formatter in µfmt's environment.
+
+    .. code-block:: toml
+      :caption: pyproject.toml
+
+      [tool.ufmt]
+      formatter = "ruff"
+
+    See :class:`~ufmt.types.Formatter` for list of supported choices.
 
 
 Integrations
