@@ -1,4 +1,6 @@
 SRCS:=ufmt
+EXTRAS:=dev,docs,ruff
+
 ifeq ($(OS),Windows_NT)
     ACTIVATE:=.venv/Scripts/activate
 else
@@ -14,7 +16,7 @@ venv: .venv
 
 install:
 	python -m pip install -U pip
-	python -m pip install -Ue .[dev,docs]
+	python -m pip install -Ue .[$(EXTRAS)]
 
 release: lint test clean
 	flit publish

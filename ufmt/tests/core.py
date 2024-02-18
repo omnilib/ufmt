@@ -142,6 +142,52 @@ class CoreTest(TestCase):
             )
             self.assertEqual(CORRECTLY_FORMATTED_STUB.encode(), result)
 
+    def test_ufmt_bytes_formatter(self):
+        black_config = BlackConfig()
+        usort_config = UsortConfig()
+
+        with self.subTest("changed"):
+            result = ufmt.ufmt_bytes(
+                Path("foo.py"),
+                POORLY_FORMATTED_CODE.encode(),
+                formatter=ufmt.Formatter.ruff_api,
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
+
+        with self.subTest("unchanged"):
+            result = ufmt.ufmt_bytes(
+                Path("foo.py"),
+                CORRECTLY_FORMATTED_CODE.encode(),
+                formatter=ufmt.Formatter.ruff_api,
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
+
+        with self.subTest("type stub"):
+            result = ufmt.ufmt_bytes(
+                Path("foo.pyi"),
+                POORLY_FORMATTED_STUB.encode(),
+                formatter=ufmt.Formatter.ruff_api,
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_STUB.encode(), result)
+
+        with self.subTest("unsupported formatter"):
+            with self.assertRaisesRegex(
+                ValueError, "'garbage' is not a supported formatter"
+            ):
+                ufmt.ufmt_bytes(
+                    Path("foo.pyi"),
+                    POORLY_FORMATTED_STUB.encode(),
+                    formatter="garbage",
+                    black_config=black_config,
+                    usort_config=usort_config,
+                )
+
     def test_ufmt_bytes_pre_processor(self):
         def pre_processor(
             path: Path, content: bytes, *, encoding: Encoding = "utf-8"

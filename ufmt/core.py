@@ -12,7 +12,8 @@ from tempfile import TemporaryDirectory
 from typing import Generator, Match, Optional, Sequence
 from warnings import warn
 
-from black import format_file_contents, NothingChanged
+import black
+import black.mode
 from moreorless.click import unified_diff
 from trailrunner import Trailrunner
 from usort import usort
@@ -23,6 +24,7 @@ from .types import (
     BlackConfigFactory,
     Encoding,
     FileContent,
+    Formatter,
     Processor,
     Result,
     SkipFormatting,
@@ -40,6 +42,7 @@ def ufmt_bytes(
     content: FileContent,
     *,
     encoding: Encoding = "utf-8",
+    formatter: Formatter = Formatter.black,
     black_config: BlackConfig,
     usort_config: UsortConfig,
     pre_processor: Optional[Processor] = None,
@@ -64,6 +67,12 @@ def ufmt_bytes(
     after it has been run through µsort and black. The return value of the post
     processor will replace the final return value of :func:`ufmt_bytes`.
 
+    **Experimental:**
+    The optional ``formatter`` parameter accepts a :class:`~ufmt.types.Formatter`
+    value choosing a formatter implementation to use instead of black.
+    This should be passed by alternate frontends based on the project's
+    :attr:`formatter` option in ``pyproject.toml``.
+
     .. note::
         Content will be decoded before passing to black, and re-encoded to bytes
         again. Be sure to pass a known-valid unicode encoding for the content.
@@ -76,6 +85,7 @@ def ufmt_bytes(
 
         :func:`ufmt.util.read_file` can be used to both read bytes from disk, and make a
         best guess at file encodings. Otherwise, use :func:`tokenize.detect_encodings`.
+
     """
     if pre_processor is not None:
         content = pre_processor(path, content, encoding=encoding)
@@ -89,10 +99,32 @@ def ufmt_bytes(
 
     try:
         content_str = result.output.decode(encoding)
-        content_str = format_file_contents(content_str, fast=False, mode=black_config)
+        if formatter == Formatter.black:
+            content_str = black.format_file_contents(
+                content_str,
+                fast=False,
+                mode=black_config,
+            )
+        elif formatter == Formatter.ruff_api:
+            import ruff_api
+
+            options = ruff_api.FormatOptions(
+                target_version=str(
+                    black_config.target_versions.pop()
+                    if black_config.target_versions
+                    else {black.mode.TargetVersion.PY38}
+                ),
+                line_width=black_config.line_length,
+                preview=black_config.preview,
+            )
+            content_str = ruff_api.format_string(
+                path.as_posix(), content_str, options=options
+            )
+        else:
+            raise ValueError(f"{formatter!r} is not a supported formatter")
         content = content_str.encode(encoding)
 
-    except NothingChanged:
+    except black.NothingChanged:
         content = result.output
 
     if post_processor is not None:
@@ -150,6 +182,7 @@ def ufmt_file(
     usort_config_factory: Optional[UsortConfigFactory] = None,
     pre_processor: Optional[Processor] = None,
     post_processor: Optional[Processor] = None,
+    root: Optional[Path] = None,
 ) -> Result:
     """
     Format a single file on disk, and returns a :class:`Result`.
@@ -184,6 +217,7 @@ def ufmt_file(
     the skip exception, or ``True`` if no message is given.
     """
     path = path.resolve()
+    config = ufmt_config(path.parent, root)
     black_config = (black_config_factory or make_black_config)(path)
     usort_config = (usort_config_factory or UsortConfig.find)(path)
 
@@ -197,6 +231,7 @@ def ufmt_file(
             path,
             src_contents,
             encoding=encoding,
+            formatter=config.formatter,
             black_config=black_config,
             usort_config=usort_config,
             pre_processor=pre_processor,
