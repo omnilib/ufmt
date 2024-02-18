@@ -2,7 +2,6 @@
 # Licensed under the MIT license
 import logging
 from dataclasses import dataclass, field
-from enum import Enum
 from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional, Sequence
