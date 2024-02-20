@@ -9,6 +9,8 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import call, Mock, patch
 
+import black
+import ruff_api
 import trailrunner
 from libcst import ParserSyntaxError
 
@@ -111,11 +113,14 @@ print "hello world"
 class CoreTest(TestCase):
     maxDiff = None
 
-    def test_ufmt_bytes(self):
+    @patch("ufmt.core.black.format_file_contents", wraps=black.format_file_contents)
+    @patch("ufmt.core.ruff_api.format_string", wraps=ruff_api.format_string)
+    def test_ufmt_bytes(self, ruff_mock, black_mock):
         black_config = BlackConfig()
         usort_config = UsortConfig()
 
         with self.subTest("changed"):
+            black_mock.reset_mock()
             result = ufmt.ufmt_bytes(
                 Path("foo.py"),
                 POORLY_FORMATTED_CODE.encode(),
@@ -123,8 +128,11 @@ class CoreTest(TestCase):
                 usort_config=usort_config,
             )
             self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
+            black_mock.assert_called_once()
+            ruff_mock.assert_not_called()
 
         with self.subTest("unchanged"):
+            black_mock.reset_mock()
             result = ufmt.ufmt_bytes(
                 Path("foo.py"),
                 CORRECTLY_FORMATTED_CODE.encode(),
@@ -132,8 +140,11 @@ class CoreTest(TestCase):
                 usort_config=usort_config,
             )
             self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
+            black_mock.assert_called_once()
+            ruff_mock.assert_not_called()
 
         with self.subTest("type stub"):
+            black_mock.reset_mock()
             result = ufmt.ufmt_bytes(
                 Path("foo.pyi"),
                 POORLY_FORMATTED_STUB.encode(),
@@ -141,12 +152,17 @@ class CoreTest(TestCase):
                 usort_config=usort_config,
             )
             self.assertEqual(CORRECTLY_FORMATTED_STUB.encode(), result)
+            black_mock.assert_called_once()
+            ruff_mock.assert_not_called()
 
-    def test_ufmt_bytes_formatter(self):
+    @patch("ufmt.core.black.format_file_contents", wraps=black.format_file_contents)
+    @patch("ufmt.core.ruff_api.format_string", wraps=ruff_api.format_string)
+    def test_ufmt_bytes_alternate_formatter(self, ruff_mock, black_mock):
         black_config = BlackConfig()
         usort_config = UsortConfig()
 
         with self.subTest("changed"):
+            ruff_mock.reset_mock()
             result = ufmt.ufmt_bytes(
                 Path("foo.py"),
                 POORLY_FORMATTED_CODE.encode(),
@@ -155,8 +171,11 @@ class CoreTest(TestCase):
                 usort_config=usort_config,
             )
             self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
+            ruff_mock.assert_called_once()
+            black_mock.assert_not_called()
 
         with self.subTest("unchanged"):
+            ruff_mock.reset_mock()
             result = ufmt.ufmt_bytes(
                 Path("foo.py"),
                 CORRECTLY_FORMATTED_CODE.encode(),
@@ -165,8 +184,11 @@ class CoreTest(TestCase):
                 usort_config=usort_config,
             )
             self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
+            ruff_mock.assert_called_once()
+            black_mock.assert_not_called()
 
         with self.subTest("type stub"):
+            ruff_mock.reset_mock()
             result = ufmt.ufmt_bytes(
                 Path("foo.pyi"),
                 POORLY_FORMATTED_STUB.encode(),
@@ -175,6 +197,8 @@ class CoreTest(TestCase):
                 usort_config=usort_config,
             )
             self.assertEqual(CORRECTLY_FORMATTED_STUB.encode(), result)
+            ruff_mock.assert_called_once()
+            black_mock.assert_not_called()
 
         with self.subTest("unsupported formatter"):
             with self.assertRaisesRegex(

@@ -18,6 +18,11 @@ from moreorless.click import unified_diff
 from trailrunner import Trailrunner
 from usort import usort
 
+try:
+    import ruff_api
+except ImportError:  # pragma: nocover
+    pass
+
 from .config import ufmt_config
 from .types import (
     BlackConfig,
@@ -106,7 +111,6 @@ def ufmt_bytes(
                 mode=black_config,
             )
         elif formatter == Formatter.ruff_api:
-            import ruff_api
 
             options = ruff_api.FormatOptions(
                 target_version=str(
