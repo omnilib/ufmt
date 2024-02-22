@@ -22,11 +22,15 @@ Simple API
 
 .. autoclass:: ufmt.Result
 
+.. autoclass:: ufmt.UfmtConfig
+
+.. autoclass:: ufmt.UfmtConfigFactory
+
 .. autoclass:: ufmt.BlackConfig
 
-.. autoclass:: ufmt.UsortConfig
-
 .. autoclass:: ufmt.BlackConfigFactory
+
+.. autoclass:: ufmt.UsortConfig
 
 .. autoclass:: ufmt.UsortConfigFactory
 
@@ -46,6 +50,8 @@ Low-level API
 .. autoclass:: ufmt.Newline
 
 .. autoclass:: ufmt.types.Formatter
+
+.. autoclass:: ufmt.types.Sorter
 
 .. autofunction:: ufmt.ufmt_bytes
 
