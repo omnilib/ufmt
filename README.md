@@ -8,7 +8,7 @@ Safe, atomic formatting with [black][] and [µsort][]
 [![license](https://img.shields.io/pypi/l/ufmt.svg)](https://github.com/omnilib/ufmt/blob/master/LICENSE)
 [![vscode extension](https://img.shields.io/badge/vscode-extension-007ACC?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=omnilib.ufmt)
 
-µfmt is a safe, atomic code formatter for Python built on top of [black] and [µsort]:
+µfmt is a safe, atomic code formatter for Python built on top of [black][] and [µsort][]:
 
 > Black makes code review faster by producing the smallest diffs possible. Blackened code looks the same regardless of the project you’re reading.
 
@@ -67,6 +67,9 @@ $ ufmt diff <path> [<path> ...]
 Integrations
 ------------
 
+See the [user guide](https://ufmt.omnilib.dev/en/latest/guide.html#integrations)
+for details on each integration.
+
 ### GitHub Actions
 
 µfmt provides a GitHub Action that can be added to an existing workflow,
@@ -84,8 +87,6 @@ jobs:
           python-version: "3.x"
 ```
 
-See the [user guide](https://ufmt.omnilib.dev/en/latest/guide.html#github-actions) for details.
-
 ### pre-commit hook
 
 µfmt provides a [pre-commit][] hook. To format your diff before
@@ -100,8 +101,6 @@ every commit, add the following to your `.pre-commit-config.yaml` file:
           - black == 22.6.0
           - usort == 1.0.4
 ```
-
-See the [user guide](https://ufmt.omnilib.dev/en/latest/guide.html#pre-commit) for details.
 
 ### Visual Studio Code
 
@@ -125,14 +124,14 @@ Once installed, µfmt can be set as the default formatter with the following set
 
 For more details, or to install the extension, see the Visual Studio Marketplace page:
 
-<a href="https://marketplace.visualstudio.com/items?itemName=omnilib.ufmt"><img alt="VS Code extension marketplace" src="https://img.shields.io/badge/VSCode-ufmt-007ACC?style=for-the-badge&logo=visualstudiocode" /></a>
-<a href="vscode:extension/omnilib.ufmt"><img alt="Install VS Code extension now" src="https://img.shields.io/badge/-Install%20Now-107C10?style=for-the-badge&logo=visualstudiocode" /></a>
+[![VS Code extension marketplace](https://img.shields.io/badge/VSCode-ufmt-007ACC?style=for-the-badge&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=omnilib.ufmt)
+[![Install VS Code extension now](https://img.shields.io/badge/-Install%20Now-107C10?style=for-the-badge&logo=visualstudiocode)](vscode:extension/omnilib.ufmt)
 
 
 License
 -------
 
-µfmt is copyright [Amethyst Reese](https://noswap.com), and licensed under
+ufmt is copyright [Amethyst Reese](https://noswap.com), and licensed under
 the MIT license.  I am providing code in this repository to you under an open
 source license.  This is my personal repository; the license you receive to
 my code is from me and not from my employer. See the `LICENSE` file for details.
