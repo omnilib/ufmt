@@ -177,6 +177,18 @@ class ConfigTest(TestCase):
             ):
                 load_config(self.td / "fake.py")
 
+        with self.subTest("unsupported sorter"):
+            self.pyproject.write_text(
+                dedent(
+                    """
+                    [tool.ufmt]
+                    sorter = "garbage"
+                    """
+                )
+            )
+            with self.assertRaisesRegex(ValueError, "'garbage' is not a valid Sorter"):
+                load_config(self.td / "fake.py")
+
     @patch("ufmt.config.LOG")
     def test_config_excludes(self, log_mock):
         with self.subTest("missing"):
