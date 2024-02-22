@@ -8,7 +8,7 @@ from typing import Optional, Sequence
 import tomlkit
 from trailrunner import project_root
 
-from .types import Formatter, UfmtConfig
+from .types import Formatter, Sorter, UfmtConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -35,6 +35,7 @@ def load_config(path: Optional[Path] = None, root: Optional[Path] = None) -> Ufm
             raise ValueError(f"{config_path}: excludes must be a list of strings")
 
         formatter = Formatter(config.pop("formatter", UfmtConfig.formatter))
+        sorter = Sorter(config.pop("sorter", Sorter.usort))
 
         if config:
             LOG.warning("%s: unknown values ignored: %r", config_path, sorted(config))
@@ -44,6 +45,7 @@ def load_config(path: Optional[Path] = None, root: Optional[Path] = None) -> Ufm
             pyproject_path=config_path,
             excludes=excludes,
             formatter=formatter,
+            sorter=sorter,
         )
 
     return UfmtConfig()
