@@ -58,7 +58,24 @@ Options available are described as follows:
       :caption: pyproject.toml
 
       [tool.ufmt]
-      formatter = "ruff"
+      formatter = "ruff-api"
+
+    See :class:`~ufmt.types.Formatter` for list of supported choices.
+
+.. attribute:: sorter
+    :type: str
+    :value: "usort"
+
+    **Experimental** option to use an alternative sorter instead of µsort.
+    Changing this selection is likely to generate different formatting results
+    as compared to µsort, especially depending on available or pinned versions
+    of each formatter in µfmt's environment.
+
+    .. code-block:: toml
+      :caption: pyproject.toml
+
+      [tool.ufmt]
+      sorter = "usort"
 
     See :class:`~ufmt.types.Formatter` for list of supported choices.
 
