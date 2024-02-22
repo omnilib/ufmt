@@ -1,10 +1,10 @@
 # Copyright 2022 Amethyst Reese, Tim Hatch
 # Licensed under the MIT license
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Callable, List, Optional, Union
 
 from black import Mode as BlackConfig
 from typing_extensions import Protocol
@@ -38,6 +38,30 @@ class Formatter(Enum):
         table from ``pyproject.toml`` rather than Ruff's own configuration options.
         This may change in future updates.
     """
+
+
+class Sorter(Enum):
+    """
+    Preferred import sorter implementation.
+    """
+
+    skip = "skip"
+    """Skip sorting imports"""
+
+    usort = "usort"
+    """Use µsort (default)."""
+
+
+@dataclass
+class UfmtConfig:
+    project_root: Optional[Path] = None
+    pyproject_path: Optional[Path] = None
+    excludes: List[str] = field(default_factory=list)
+    formatter: Formatter = Formatter.black
+    sorter: Sorter = Sorter.usort
+
+
+UfmtConfigFactory = Callable[[Optional[Path], Optional[Path]], UfmtConfig]
 
 
 @dataclass

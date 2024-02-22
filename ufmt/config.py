@@ -1,29 +1,20 @@
 # Copyright 2022 Amethyst Reese
 # Licensed under the MIT license
 import logging
-from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional, Sequence
+from typing import Optional, Sequence
 
 import tomlkit
 from trailrunner import project_root
 
-from .types import Formatter
+from .types import Formatter, UfmtConfig
 
 LOG = logging.getLogger(__name__)
 
 
-@dataclass
-class UfmtConfig:
-    project_root: Optional[Path] = None
-    pyproject_path: Optional[Path] = None
-    excludes: List[str] = field(default_factory=list)
-    formatter: Formatter = Formatter.black
-
-
 @lru_cache
-def ufmt_config(path: Optional[Path] = None, root: Optional[Path] = None) -> UfmtConfig:
+def load_config(path: Optional[Path] = None, root: Optional[Path] = None) -> UfmtConfig:
     path = path or Path.cwd()
     if root is None:
         root = project_root(path)

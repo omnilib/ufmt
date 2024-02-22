@@ -12,6 +12,7 @@ from unittest.mock import call, Mock, patch
 import black
 import ruff_api
 import trailrunner
+import usort
 from libcst import ParserSyntaxError
 
 import ufmt
@@ -20,9 +21,12 @@ from ufmt.types import (
     BlackConfig,
     Encoding,
     FileContent,
+    Formatter,
     Result,
     SkipFormatting,
+    Sorter,
     STDIN,
+    UfmtConfig,
     UsortConfig,
 )
 
@@ -166,7 +170,7 @@ class CoreTest(TestCase):
             result = ufmt.ufmt_bytes(
                 Path("foo.py"),
                 POORLY_FORMATTED_CODE.encode(),
-                formatter=ufmt.Formatter.ruff_api,
+                ufmt_config=UfmtConfig(formatter=Formatter.ruff_api),
                 black_config=black_config,
                 usort_config=usort_config,
             )
@@ -179,7 +183,7 @@ class CoreTest(TestCase):
             result = ufmt.ufmt_bytes(
                 Path("foo.py"),
                 CORRECTLY_FORMATTED_CODE.encode(),
-                formatter=ufmt.Formatter.ruff_api,
+                ufmt_config=UfmtConfig(formatter=Formatter.ruff_api),
                 black_config=black_config,
                 usort_config=usort_config,
             )
@@ -192,7 +196,7 @@ class CoreTest(TestCase):
             result = ufmt.ufmt_bytes(
                 Path("foo.pyi"),
                 POORLY_FORMATTED_STUB.encode(),
-                formatter=ufmt.Formatter.ruff_api,
+                ufmt_config=UfmtConfig(formatter=Formatter.ruff_api),
                 black_config=black_config,
                 usort_config=usort_config,
             )
@@ -207,10 +211,67 @@ class CoreTest(TestCase):
                 ufmt.ufmt_bytes(
                     Path("foo.pyi"),
                     POORLY_FORMATTED_STUB.encode(),
-                    formatter="garbage",
+                    ufmt_config=UfmtConfig(formatter="garbage"),
                     black_config=black_config,
                     usort_config=usort_config,
                 )
+            ruff_mock.assert_called_once()
+            black_mock.assert_not_called()
+
+    @patch("ufmt.core.usort", wraps=usort.usort)
+    def test_ufmt_bytes_alternate_sorter(self, usort_mock):
+        black_config = BlackConfig()
+        usort_config = UsortConfig()
+
+        with self.subTest("default"):
+            usort_mock.reset_mock()
+            result = ufmt.ufmt_bytes(
+                Path("foo.py"),
+                POORLY_FORMATTED_CODE.encode(),
+                ufmt_config=UfmtConfig(),
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
+            usort_mock.assert_called_once()
+
+        with self.subTest("usort"):
+            usort_mock.reset_mock()
+            result = ufmt.ufmt_bytes(
+                Path("foo.py"),
+                POORLY_FORMATTED_CODE.encode(),
+                ufmt_config=UfmtConfig(),
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
+            usort_mock.assert_called_once()
+
+        with self.subTest("skip"):
+            usort_mock.reset_mock()
+            result = ufmt.ufmt_bytes(
+                Path("foo.py"),
+                POORLY_FORMATTED_CODE.encode(),
+                ufmt_config=UfmtConfig(sorter=Sorter.skip),
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            expected = POORLY_FORMATTED_CODE[:64] + CORRECTLY_FORMATTED_CODE[65:]
+            self.assertEqual(expected.encode(), result)
+            usort_mock.assert_not_called()
+
+        with self.subTest("unsupported sorter"):
+            with self.assertRaisesRegex(
+                ValueError, "'garbage' is not a supported sorter"
+            ):
+                ufmt.ufmt_bytes(
+                    Path("foo.py"),
+                    POORLY_FORMATTED_CODE.encode(),
+                    ufmt_config=UfmtConfig(sorter="garbage"),
+                    black_config=black_config,
+                    usort_config=usort_config,
+                )
+            usort_mock.assert_not_called()
 
     def test_ufmt_bytes_pre_processor(self):
         def pre_processor(
@@ -488,6 +549,7 @@ class CoreTest(TestCase):
                                 dry_run=True,
                                 diff=False,
                                 return_content=False,
+                                ufmt_config_factory=None,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -498,6 +560,7 @@ class CoreTest(TestCase):
                                 dry_run=True,
                                 diff=False,
                                 return_content=False,
+                                ufmt_config_factory=None,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -519,6 +582,7 @@ class CoreTest(TestCase):
                                 dry_run=True,
                                 diff=True,
                                 return_content=False,
+                                ufmt_config_factory=None,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -529,6 +593,7 @@ class CoreTest(TestCase):
                                 dry_run=True,
                                 diff=True,
                                 return_content=False,
+                                ufmt_config_factory=None,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -549,6 +614,7 @@ class CoreTest(TestCase):
                                 dry_run=False,
                                 diff=False,
                                 return_content=False,
+                                ufmt_config_factory=None,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -559,6 +625,7 @@ class CoreTest(TestCase):
                                 dry_run=False,
                                 diff=False,
                                 return_content=False,
+                                ufmt_config_factory=None,
                                 black_config_factory=None,
                                 usort_config_factory=None,
                                 pre_processor=None,
@@ -581,6 +648,7 @@ class CoreTest(TestCase):
                 dry_run=True,
                 diff=False,
                 return_content=False,
+                ufmt_config_factory=None,
                 black_config_factory=None,
                 usort_config_factory=None,
                 pre_processor=None,
@@ -594,6 +662,7 @@ class CoreTest(TestCase):
                 dry_run=True,
                 diff=False,
                 return_content=False,
+                ufmt_config_factory=None,
                 black_config_factory=None,
                 usort_config_factory=None,
                 pre_processor=None,
@@ -653,6 +722,7 @@ class CoreTest(TestCase):
                             dry_run=False,
                             diff=False,
                             return_content=False,
+                            ufmt_config_factory=None,
                             black_config_factory=None,
                             usort_config_factory=None,
                             pre_processor=None,
