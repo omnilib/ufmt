@@ -13,7 +13,7 @@ following this example:
 .. code-block:: toml
 
     [tool.ufmt]
-    excludes = [...]
+    excludes = []
 
 Options available are described as follows:
 

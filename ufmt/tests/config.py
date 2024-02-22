@@ -9,7 +9,7 @@ from unittest.mock import ANY, patch
 
 from trailrunner.tests.core import cd
 
-from ufmt.config import ufmt_config, UfmtConfig
+from ufmt.config import load_config, UfmtConfig
 
 
 class ConfigTest(TestCase):
@@ -23,7 +23,7 @@ class ConfigTest(TestCase):
         self.pyproject = self.td / "pyproject.toml"
 
     def subTest(self, *args, **kwargs):
-        ufmt_config.cache_clear()
+        load_config.cache_clear()
         return super().subTest(*args, **kwargs)
 
     def test_ufmt_config(self):
@@ -43,18 +43,18 @@ class ConfigTest(TestCase):
         bar.write_text("print('hello world')\n")
 
         with self.subTest("absolute path, no pyproject.toml"):
-            config = ufmt_config(bar)
+            config = load_config(bar)
             self.assertEqual(UfmtConfig(), config)
 
         with self.subTest("local path, no pyproject.toml"):
             with cd(foo):
-                config = ufmt_config()
+                config = load_config()
                 self.assertEqual(UfmtConfig(), config)
 
         self.pyproject.write_text("")
 
         with self.subTest("absolute path, empty pyproject.toml"):
-            config = ufmt_config(bar)
+            config = load_config(bar)
             self.assertEqual(
                 UfmtConfig(
                     project_root=self.td, pyproject_path=self.pyproject, excludes=[]
@@ -64,7 +64,7 @@ class ConfigTest(TestCase):
 
         with self.subTest("local path, empty pyproject.toml"):
             with cd(self.td):
-                config = ufmt_config()
+                config = load_config()
                 self.assertEqual(
                     UfmtConfig(
                         project_root=self.td,
@@ -77,7 +77,7 @@ class ConfigTest(TestCase):
         self.pyproject.write_text(fake_config)
 
         with self.subTest("absolute path, with pyproject.toml"):
-            config = ufmt_config(bar)
+            config = load_config(bar)
             self.assertEqual(
                 UfmtConfig(
                     project_root=self.td,
@@ -89,7 +89,7 @@ class ConfigTest(TestCase):
 
         with self.subTest("local path, with pyproject.toml"):
             with cd(self.td):
-                config = ufmt_config()
+                config = load_config()
                 self.assertEqual(
                     UfmtConfig(
                         project_root=self.td,
@@ -100,7 +100,7 @@ class ConfigTest(TestCase):
                 )
 
         with self.subTest("absolute path, manually specify project root"):
-            config = ufmt_config(root=self.td)
+            config = load_config(root=self.td)
             self.assertEqual(
                 UfmtConfig(
                     project_root=self.td,
@@ -122,7 +122,7 @@ class ConfigTest(TestCase):
                 )
             )
             expected = UfmtConfig(project_root=self.td, pyproject_path=self.pyproject)
-            result = ufmt_config(self.td / "fake.py")
+            result = load_config(self.td / "fake.py")
             self.assertEqual(expected, result)
 
             log_mock.warning.assert_called_once()
@@ -138,7 +138,7 @@ class ConfigTest(TestCase):
                 )
             )
             expected = UfmtConfig(project_root=self.td, pyproject_path=self.pyproject)
-            result = ufmt_config(self.td / "fake.py")
+            result = load_config(self.td / "fake.py")
             self.assertEqual(expected, result)
 
             log_mock.warning.assert_called_once()
@@ -155,7 +155,7 @@ class ConfigTest(TestCase):
                 )
             )
             expected = UfmtConfig(project_root=self.td, pyproject_path=self.pyproject)
-            result = ufmt_config(self.td / "fake.py")
+            result = load_config(self.td / "fake.py")
             self.assertEqual(expected, result)
 
             log_mock.warning.assert_called_with(
@@ -175,7 +175,7 @@ class ConfigTest(TestCase):
             with self.assertRaisesRegex(
                 ValueError, "'garbage' is not a valid Formatter"
             ):
-                ufmt_config(self.td / "fake.py")
+                load_config(self.td / "fake.py")
 
     @patch("ufmt.config.LOG")
     def test_config_excludes(self, log_mock):
@@ -188,7 +188,7 @@ class ConfigTest(TestCase):
                 )
             )
             expected = UfmtConfig(project_root=self.td, pyproject_path=self.pyproject)
-            result = ufmt_config(self.td / "fake.py")
+            result = load_config(self.td / "fake.py")
             self.assertEqual(expected, result)
             log_mock.assert_not_called()
 
@@ -204,7 +204,7 @@ class ConfigTest(TestCase):
             expected = UfmtConfig(
                 project_root=self.td, pyproject_path=self.pyproject, excludes=[]
             )
-            result = ufmt_config(self.td / "fake.py")
+            result = load_config(self.td / "fake.py")
             self.assertEqual(expected, result)
             log_mock.assert_not_called()
 
@@ -222,7 +222,7 @@ class ConfigTest(TestCase):
                 pyproject_path=self.pyproject,
                 excludes=["fixtures/"],
             )
-            result = ufmt_config(self.td / "fake.py")
+            result = load_config(self.td / "fake.py")
             self.assertEqual(expected, result)
             log_mock.assert_not_called()
 
@@ -238,4 +238,4 @@ class ConfigTest(TestCase):
             with self.assertRaisesRegex(
                 ValueError, "excludes must be a list of strings"
             ):
-                ufmt_config(self.td / "fake.py")
+                load_config(self.td / "fake.py")

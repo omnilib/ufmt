@@ -23,7 +23,7 @@ try:
 except ImportError:  # pragma: nocover
     pass
 
-from .config import ufmt_config
+from .config import load_config
 from .types import (
     BlackConfig,
     BlackConfigFactory,
@@ -33,7 +33,10 @@ from .types import (
     Processor,
     Result,
     SkipFormatting,
+    Sorter,
     STDIN,
+    UfmtConfig,
+    UfmtConfigFactory,
     UsortConfig,
     UsortConfigFactory,
 )
@@ -47,9 +50,9 @@ def ufmt_bytes(
     content: FileContent,
     *,
     encoding: Encoding = "utf-8",
-    formatter: Formatter = Formatter.black,
     black_config: BlackConfig,
     usort_config: UsortConfig,
+    ufmt_config: UfmtConfig = UfmtConfig(),
     pre_processor: Optional[Processor] = None,
     post_processor: Optional[Processor] = None,
 ) -> FileContent:
@@ -73,10 +76,12 @@ def ufmt_bytes(
     processor will replace the final return value of :func:`ufmt_bytes`.
 
     **Experimental:**
-    The optional ``formatter`` parameter accepts a :class:`~ufmt.types.Formatter`
-    value choosing a formatter implementation to use instead of black.
-    This should be passed by alternate frontends based on the project's
-    :attr:`formatter` option in ``pyproject.toml``.
+    The optional ``ufmt_config`` parameter allows passing alternative
+    :class:`~ufmt.types.Formatter` and :class:`~ufmt.types.Sorter`
+    values, to choose formatting and sorting implementations instead of black and µsort.
+    This should be passed by alternate frontends, and be based on the project's
+    configuration in ``pyproject.toml``. Optionally can be passed through from
+    :func:`ufmt_file` or :func:`ufmt_paths` as ``ufmt_config_factory``.
 
     .. note::
         Content will be decoded before passing to black, and re-encoded to bytes
@@ -95,41 +100,47 @@ def ufmt_bytes(
     if pre_processor is not None:
         content = pre_processor(path, content, encoding=encoding)
 
-    result = usort(content, usort_config, path)
-    if result.error:
-        raise result.error
+    # run configured sorter
+    if ufmt_config.sorter == Sorter.usort:
+        result = usort(content, usort_config, path)
+        if result.error:
+            raise result.error
+        content = result.output
+    elif ufmt_config.sorter == Sorter.skip:
+        pass
+    else:
+        raise ValueError(f"{ufmt_config.sorter!r} is not a supported sorter")
 
     if path.suffix == ".pyi":
         black_config = replace(black_config, is_pyi=True)
 
-    try:
-        content_str = result.output.decode(encoding)
-        if formatter == Formatter.black:
+    # run configured formatter
+    content_str = content.decode(encoding)
+    if ufmt_config.formatter == Formatter.black:
+        try:
             content_str = black.format_file_contents(
                 content_str,
                 fast=False,
                 mode=black_config,
             )
-        elif formatter == Formatter.ruff_api:
-
-            options = ruff_api.FormatOptions(
-                target_version=str(
-                    black_config.target_versions.pop()
-                    if black_config.target_versions
-                    else {black.mode.TargetVersion.PY38}
-                ),
-                line_width=black_config.line_length,
-                preview=black_config.preview,
-            )
-            content_str = ruff_api.format_string(
-                path.as_posix(), content_str, options=options
-            )
-        else:
-            raise ValueError(f"{formatter!r} is not a supported formatter")
-        content = content_str.encode(encoding)
-
-    except black.NothingChanged:
-        content = result.output
+        except black.NothingChanged:
+            content = result.output
+    elif ufmt_config.formatter == Formatter.ruff_api:
+        options = ruff_api.FormatOptions(
+            target_version=str(
+                black_config.target_versions.pop()
+                if black_config.target_versions
+                else {black.mode.TargetVersion.PY38}
+            ),
+            line_width=black_config.line_length,
+            preview=black_config.preview,
+        )
+        content_str = ruff_api.format_string(
+            path.as_posix(), content_str, options=options
+        )
+    else:
+        raise ValueError(f"{ufmt_config.formatter!r} is not a supported formatter")
+    content = content_str.encode(encoding)
 
     if post_processor is not None:
         content = post_processor(path, content, encoding=encoding)
@@ -170,6 +181,7 @@ def ufmt_string(
         path,
         data,
         encoding=encoding,
+        ufmt_config=load_config(path),
         black_config=black_config,
         usort_config=usort_config,
     )
@@ -182,6 +194,7 @@ def ufmt_file(
     dry_run: bool = False,
     diff: bool = False,
     return_content: bool = False,
+    ufmt_config_factory: Optional[UfmtConfigFactory] = None,
     black_config_factory: Optional[BlackConfigFactory] = None,
     usort_config_factory: Optional[UsortConfigFactory] = None,
     pre_processor: Optional[Processor] = None,
@@ -221,7 +234,7 @@ def ufmt_file(
     the skip exception, or ``True`` if no message is given.
     """
     path = path.resolve()
-    config = ufmt_config(path.parent, root)
+    ufmt_config = (ufmt_config_factory or load_config)(path.parent, root)
     black_config = (black_config_factory or make_black_config)(path)
     usort_config = (usort_config_factory or UsortConfig.find)(path)
 
@@ -235,7 +248,7 @@ def ufmt_file(
             path,
             src_contents,
             encoding=encoding,
-            formatter=config.formatter,
+            ufmt_config=ufmt_config,
             black_config=black_config,
             usort_config=usort_config,
             pre_processor=pre_processor,
@@ -285,6 +298,7 @@ def ufmt_stdin(
     dry_run: bool = False,
     diff: bool = False,
     return_content: bool = False,
+    ufmt_config_factory: Optional[UfmtConfigFactory] = None,
     black_config_factory: Optional[BlackConfigFactory] = None,
     usort_config_factory: Optional[UsortConfigFactory] = None,
     pre_processor: Optional[Processor] = None,
@@ -305,6 +319,7 @@ def ufmt_stdin(
     See :func:`ufmt_file` for details on parameters, config factories,
     and post processors. All parameters are passed through to :func:`ufmt_file`.
     """
+    ufmt_config = (ufmt_config_factory or load_config)(path, None)
     black_config = (black_config_factory or make_black_config)(path)
     usort_config = (usort_config_factory or UsortConfig.find)(path)
 
@@ -321,8 +336,9 @@ def ufmt_stdin(
             dry_run=dry_run,
             diff=diff,
             return_content=return_content,
-            black_config_factory=lambda p: black_config,
-            usort_config_factory=lambda p: usort_config,
+            ufmt_config_factory=lambda _path, _root: ufmt_config,
+            black_config_factory=lambda _path: black_config,
+            usort_config_factory=lambda _path: usort_config,
             pre_processor=pre_processor,
             post_processor=post_processor,
         )
@@ -351,6 +367,7 @@ def ufmt_paths(
     dry_run: bool = False,
     diff: bool = False,
     return_content: bool = False,
+    ufmt_config_factory: Optional[UfmtConfigFactory] = None,
     black_config_factory: Optional[BlackConfigFactory] = None,
     usort_config_factory: Optional[UsortConfigFactory] = None,
     pre_processor: Optional[Processor] = None,
@@ -401,6 +418,7 @@ def ufmt_paths(
             dry_run=dry_run,
             diff=diff,
             return_content=return_content,
+            ufmt_config_factory=ufmt_config_factory,
             black_config_factory=black_config_factory,
             usort_config_factory=usort_config_factory,
             pre_processor=pre_processor,
@@ -420,7 +438,7 @@ def ufmt_paths(
             if path == STDIN:
                 LOG.warning("Cannot mix stdin ('-') with normal paths, ignoring")
                 continue
-            config = ufmt_config(path, root)
+            config = (ufmt_config_factory or load_config)(path, root)
             yield from runner.walk(path, excludes=config.excludes)
 
     fn = partial(
@@ -428,6 +446,7 @@ def ufmt_paths(
         dry_run=dry_run,
         diff=diff,
         return_content=return_content,
+        ufmt_config_factory=ufmt_config_factory,
         black_config_factory=black_config_factory,
         usort_config_factory=usort_config_factory,
         pre_processor=pre_processor,
