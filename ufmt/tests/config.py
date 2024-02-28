@@ -1,7 +1,6 @@
 # Copyright 2022 Amethyst Reese
 # Licensed under the MIT license
 
-from contextlib import AbstractContextManager
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from textwrap import dedent
@@ -25,7 +24,7 @@ class ConfigTest(TestCase):
         self.td = Path(self._td.name).resolve()
         self.pyproject = self.td / "pyproject.toml"
 
-    def subTest(self, *args: Any, **kwargs: Any) -> AbstractContextManager[None]:
+    def subTest(self, *args: Any, **kwargs: Any) -> Any:
         load_config.cache_clear()
         return super().subTest(*args, **kwargs)
 
