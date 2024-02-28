@@ -37,6 +37,10 @@ test:
 deps:
 	python -m pessimist -c 'python -m $(SRCS).tests' --requirements= --fast .
 
+.PHONY: benchmark
+benchmark:
+	python -m $(SRCS).tests.benchmark
+
 .PHONY: html
 html: .venv README.md docs/*.rst docs/conf.py
 	source $(ACTIVATE) && sphinx-build -ab html docs html
