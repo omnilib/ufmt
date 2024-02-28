@@ -4,29 +4,31 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from textwrap import dedent
+from typing import Any
 from unittest import TestCase
-from unittest.mock import ANY, patch
+from unittest.mock import ANY, Mock, patch
 
 from trailrunner.tests.core import cd
 
-from ufmt.config import load_config, UfmtConfig
+from ufmt.config import load_config
+from ufmt.types import UfmtConfig
 
 
 class ConfigTest(TestCase):
     maxDiff = None
 
-    def setUp(self):
+    def setUp(self) -> None:
         self._td = TemporaryDirectory()
         self.addCleanup(self._td.cleanup)
 
         self.td = Path(self._td.name).resolve()
         self.pyproject = self.td / "pyproject.toml"
 
-    def subTest(self, *args, **kwargs):
+    def subTest(self, *args: Any, **kwargs: Any) -> Any:
         load_config.cache_clear()
         return super().subTest(*args, **kwargs)
 
-    def test_ufmt_config(self):
+    def test_ufmt_config(self) -> None:
         fake_config = dedent(
             """
             [tool.ufmt]
@@ -111,7 +113,7 @@ class ConfigTest(TestCase):
             )
 
     @patch("ufmt.config.LOG")
-    def test_invalid_config(self, log_mock):
+    def test_invalid_config(self, log_mock: Mock) -> None:
         with self.subTest("string"):
             self.pyproject.write_text(
                 dedent(
@@ -190,7 +192,7 @@ class ConfigTest(TestCase):
                 load_config(self.td / "fake.py")
 
     @patch("ufmt.config.LOG")
-    def test_config_excludes(self, log_mock):
+    def test_config_excludes(self, log_mock: Mock) -> None:
         with self.subTest("missing"):
             self.pyproject.write_text(
                 dedent(

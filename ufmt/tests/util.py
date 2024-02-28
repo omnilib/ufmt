@@ -3,10 +3,11 @@
 
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import cast
 from unittest import TestCase
 
 import tomlkit
-from black import TargetVersion
+from black.mode import TargetVersion
 
 import ufmt
 from .core import FAKE_CONFIG, POORLY_FORMATTED_CODE
@@ -20,52 +21,41 @@ def bar():
 
 
 class UtilTest(TestCase):
-    def test_black_config(self):
-        black_config = dict(
-            target_version=["py36", "py37"],
-            skip_string_normalization=True,
-            line_length=87,
-        )
-
+    def test_black_config(self) -> None:
         doc = tomlkit.parse(FAKE_CONFIG)
         black = tomlkit.table()
-        for key, value in black_config.items():
-            black[key] = value
-        doc["tool"].add("black", black)
+        black["target_version"] = ["py36", "py37"]
+        black["skip_string_normalization"] = True
+        black["line_length"] = 87
+        cast(tomlkit.container.Container, doc["tool"]).add("black", black)
 
         with TemporaryDirectory() as td:
-            td = Path(td)
+            tdp = Path(td)
 
-            pyproj = td / "pyproject.toml"
+            pyproj = tdp / "pyproject.toml"
             pyproj.write_text(tomlkit.dumps(doc))
 
-            f = td / "foo.py"
+            f = tdp / "foo.py"
             f.write_text(POORLY_FORMATTED_CODE)
 
             result = ufmt.ufmt_file(f, dry_run=True)
             self.assertTrue(result.changed)
 
-            mode = ufmt.util.make_black_config(td)
+            mode = ufmt.util.make_black_config(tdp)
 
             with self.subTest("target_versions"):
                 self.assertEqual(
                     mode.target_versions,
-                    {
-                        TargetVersion[item.upper()]
-                        for item in black_config["target_version"]
-                    },
+                    {TargetVersion[item.upper()] for item in ("py36", "py37")},
                 )
 
             with self.subTest("string_normalization"):
-                self.assertIs(
-                    mode.string_normalization,
-                    not black_config["skip_string_normalization"],
-                )
+                self.assertFalse(mode.string_normalization)
 
             with self.subTest("line_length"):
-                self.assertEqual(mode.line_length, black_config["line_length"])
+                self.assertEqual(mode.line_length, 87)
 
-    def test_read_file(self):
+    def test_read_file(self) -> None:
         with TemporaryDirectory() as td:
             tdp = Path(td).resolve()
             foo = tdp / "foo.py"

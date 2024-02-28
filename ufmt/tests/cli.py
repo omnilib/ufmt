@@ -7,34 +7,34 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import skipIf, TestCase
-from unittest.mock import call, patch
+from unittest.mock import call, Mock, patch
 
 import trailrunner
 from click.testing import CliRunner
 from libcst import ParserSyntaxError
 
 from ufmt.cli import echo_results, main
-from ufmt.core import Result
+from ufmt.types import Result
 
 from .core import CORRECTLY_FORMATTED_CODE, POORLY_FORMATTED_CODE
 
 
 @patch.object(trailrunner.core.Trailrunner, "DEFAULT_EXECUTOR", ThreadPoolExecutor)
 class CliTest(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.runner = CliRunner(mix_stderr=False)
         self.cwd = os.getcwd()
         self.td = TemporaryDirectory()
         self.tdp = Path(self.td.name).resolve()
         os.chdir(self.tdp)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         os.chdir(self.cwd)
         self.td.cleanup()
 
     @patch("ufmt.cli.echo_color_precomputed_diff")
     @patch("ufmt.cli.click.secho")
-    def test_echo(self, echo_mock, mol_mock):
+    def test_echo(self, echo_mock: Mock, mol_mock: Mock) -> None:
         f1 = Path("foo/bar.py")
         f2 = Path("fuzz/buzz.py")
         f3 = Path("make/rake.py")
@@ -100,7 +100,7 @@ class CliTest(TestCase):
             mol_mock.reset_mock()
 
     @patch("ufmt.cli.ufmt_paths")
-    def test_check(self, ufmt_mock):
+    def test_check(self, ufmt_mock: Mock) -> None:
         with self.subTest("no paths given"):
             ufmt_mock.reset_mock()
             ufmt_mock.return_value = []
@@ -180,7 +180,7 @@ class CliTest(TestCase):
             self.assertEqual(0, result.exit_code)
 
     @patch("ufmt.cli.ufmt_paths")
-    def test_diff(self, ufmt_mock):
+    def test_diff(self, ufmt_mock: Mock) -> None:
         with self.subTest("no paths given"):
             ufmt_mock.reset_mock()
             ufmt_mock.return_value = []
@@ -289,7 +289,7 @@ class CliTest(TestCase):
             self.assertEqual(2, result.exit_code)
 
     @patch("ufmt.cli.ufmt_paths")
-    def test_format(self, ufmt_mock):
+    def test_format(self, ufmt_mock: Mock) -> None:
         with self.subTest("no paths given"):
             ufmt_mock.reset_mock()
             ufmt_mock.return_value = []
@@ -418,14 +418,14 @@ class CliTest(TestCase):
             self.assertIn("Formatted hello.py\n", result.stderr)
             self.assertEqual(0, result.exit_code)
 
-    def test_end_to_end(self):
+    def test_end_to_end(self) -> None:
         alpha = self.tdp / "alpha.py"
         beta = self.tdp / "beta.py"
         (self.tdp / "sub").mkdir()
         gamma = self.tdp / "sub" / "gamma.py"
         kappa = self.tdp / "sub" / "kappa.py"
 
-        def reset():
+        def reset() -> None:
             alpha.write_text(CORRECTLY_FORMATTED_CODE)
             beta.write_text(POORLY_FORMATTED_CODE)
             gamma.write_text(CORRECTLY_FORMATTED_CODE)

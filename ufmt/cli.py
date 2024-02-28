@@ -10,8 +10,8 @@ import click
 from moreorless.click import echo_color_precomputed_diff
 
 from .__version__ import __version__
-from .core import Result, ufmt_paths
-from .types import Options
+from .core import ufmt_paths
+from .types import Options, Result
 from .util import enable_libcst_native
 
 
@@ -113,7 +113,7 @@ def main(
     debug: Optional[bool],
     concurrency: Optional[int],
     root: Optional[Path],
-):
+) -> None:
     init_logging(debug=debug)
 
     ctx.obj = Options(
@@ -130,7 +130,7 @@ def main(
 @click.argument(
     "names", type=click.Path(allow_dash=True), nargs=-1, metavar="[PATH] ..."
 )
-def check(ctx: click.Context, names: List[str]):
+def check(ctx: click.Context, names: List[str]) -> None:
     """Check formatting of one or more paths"""
     options: Options = ctx.obj
     paths = [Path(name) for name in names] if names else [Path(".")]
@@ -147,7 +147,7 @@ def check(ctx: click.Context, names: List[str]):
 @click.argument(
     "names", type=click.Path(allow_dash=True), nargs=-1, metavar="[PATH] ..."
 )
-def diff(ctx: click.Context, names: List[str]):
+def diff(ctx: click.Context, names: List[str]) -> None:
     """Generate diffs for any files that need formatting"""
     options: Options = ctx.obj
     paths = [Path(name) for name in names] if names else [Path(".")]
@@ -168,7 +168,7 @@ def diff(ctx: click.Context, names: List[str]):
 @click.argument(
     "names", type=click.Path(allow_dash=True), nargs=-1, metavar="[PATH] ..."
 )
-def format(ctx: click.Context, names: List[str]):
+def format(ctx: click.Context, names: List[str]) -> None:
     """Format one or more paths in place"""
     options: Options = ctx.obj
     paths = [Path(name) for name in names] if names else [Path(".")]

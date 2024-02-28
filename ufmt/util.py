@@ -6,7 +6,8 @@ import tokenize
 from pathlib import Path
 from typing import Tuple
 
-from black import find_pyproject_toml, parse_pyproject_toml, TargetVersion
+from black.files import find_pyproject_toml, parse_pyproject_toml
+from black.mode import TargetVersion
 
 from .types import BlackConfig, Encoding, FileContent, Newline
 
@@ -27,10 +28,7 @@ def make_black_config(path: Path) -> BlackConfig:
     }
     config["string_normalization"] = not config.pop("skip_string_normalization", False)
 
-    names = {
-        field.name
-        for field in BlackConfig.__dataclass_fields__.values()  # type: ignore[attr-defined]
-    }
+    names = {field.name for field in BlackConfig.__dataclass_fields__.values()}
     config = {name: value for name, value in config.items() if name in names}
 
     return BlackConfig(**config)
