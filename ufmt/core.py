@@ -234,7 +234,7 @@ def ufmt_file(
     the skip exception, or ``True`` if no message is given.
     """
     path = path.resolve()
-    ufmt_config = (ufmt_config_factory or load_config)(path.parent, root)
+    ufmt_config = (ufmt_config_factory or load_config)(path, root)
     black_config = (black_config_factory or make_black_config)(path)
     usort_config = (usort_config_factory or UsortConfig.find)(path)
 
