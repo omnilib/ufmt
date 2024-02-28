@@ -14,7 +14,8 @@ from warnings import warn
 
 import black
 import black.mode
-from moreorless.click import unified_diff
+import black.report
+from moreorless import unified_diff
 from trailrunner import Trailrunner
 from usort import usort
 
@@ -123,7 +124,7 @@ def ufmt_bytes(
                 fast=False,
                 mode=black_config,
             )
-        except black.NothingChanged:
+        except black.report.NothingChanged:
             content = result.output
     elif ufmt_config.formatter == Formatter.ruff_api:
         options = ruff_api.FormatOptions(
@@ -346,7 +347,7 @@ def ufmt_stdin(
         if result.diff and path != STDIN:
             real_path_str = path.as_posix()
 
-            def replacement(match: Match) -> str:
+            def replacement(match: Match[str]) -> str:
                 return match.group(1) + real_path_str
 
             pattern = re.compile(r"^((?:---|\+\+\+)\s+).+$", re.M)

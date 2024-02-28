@@ -119,7 +119,7 @@ class CoreTest(TestCase):
 
     @patch("ufmt.core.black.format_file_contents", wraps=black.format_file_contents)
     @patch("ufmt.core.ruff_api.format_string", wraps=ruff_api.format_string)
-    def test_ufmt_bytes(self, ruff_mock, black_mock):
+    def test_ufmt_bytes(self, ruff_mock: Mock, black_mock: Mock) -> None:
         black_config = BlackConfig()
         usort_config = UsortConfig()
 
@@ -161,7 +161,9 @@ class CoreTest(TestCase):
 
     @patch("ufmt.core.black.format_file_contents", wraps=black.format_file_contents)
     @patch("ufmt.core.ruff_api.format_string", wraps=ruff_api.format_string)
-    def test_ufmt_bytes_alternate_formatter(self, ruff_mock, black_mock):
+    def test_ufmt_bytes_alternate_formatter(
+        self, ruff_mock: Mock, black_mock: Mock
+    ) -> None:
         black_config = BlackConfig()
         usort_config = UsortConfig()
 
@@ -211,7 +213,7 @@ class CoreTest(TestCase):
                 ufmt.ufmt_bytes(
                     Path("foo.pyi"),
                     POORLY_FORMATTED_STUB.encode(),
-                    ufmt_config=UfmtConfig(formatter="garbage"),
+                    ufmt_config=UfmtConfig(formatter="garbage"),  # type:ignore
                     black_config=black_config,
                     usort_config=usort_config,
                 )
@@ -219,7 +221,7 @@ class CoreTest(TestCase):
             black_mock.assert_not_called()
 
     @patch("ufmt.core.usort", wraps=usort.usort)
-    def test_ufmt_bytes_alternate_sorter(self, usort_mock):
+    def test_ufmt_bytes_alternate_sorter(self, usort_mock: Mock) -> None:
         black_config = BlackConfig()
         usort_config = UsortConfig()
 
@@ -267,13 +269,13 @@ class CoreTest(TestCase):
                 ufmt.ufmt_bytes(
                     Path("foo.py"),
                     POORLY_FORMATTED_CODE.encode(),
-                    ufmt_config=UfmtConfig(sorter="garbage"),
+                    ufmt_config=UfmtConfig(sorter="garbage"),  # type:ignore
                     black_config=black_config,
                     usort_config=usort_config,
                 )
             usort_mock.assert_not_called()
 
-    def test_ufmt_bytes_pre_processor(self):
+    def test_ufmt_bytes_pre_processor(self) -> None:
         def pre_processor(
             path: Path, content: bytes, *, encoding: Encoding = "utf-8"
         ) -> bytes:
@@ -294,7 +296,7 @@ class CoreTest(TestCase):
             CORRECTLY_FORMATTED_CODE.encode() + b'\n\nprint("hello")\n', result
         )
 
-    def test_ufmt_bytes_post_processor(self):
+    def test_ufmt_bytes_post_processor(self) -> None:
         def post_processor(
             path: Path, content: bytes, *, encoding: Encoding = "utf-8"
         ) -> bytes:
@@ -315,7 +317,7 @@ class CoreTest(TestCase):
             CORRECTLY_FORMATTED_CODE.encode() + b"\nprint('hello')\n", result
         )
 
-    def test_ufmt_string(self):
+    def test_ufmt_string(self) -> None:
         black_config = BlackConfig()
         usort_config = UsortConfig()
 
@@ -353,10 +355,10 @@ class CoreTest(TestCase):
         with self.subTest("version check"):
             self.assertRegex(ufmt.__version__, r"^2\.", "remove ufmt_string in 3.0")
 
-    def test_ufmt_file(self):
+    def test_ufmt_file(self) -> None:
         with TemporaryDirectory() as td:
-            td = Path(td)
-            f = td / "foo.py"
+            tdp = Path(td)
+            f = tdp / "foo.py"
             f.write_text(POORLY_FORMATTED_CODE)
 
             with self.subTest("dry run"):
@@ -452,7 +454,7 @@ class CoreTest(TestCase):
 
     @patch("ufmt.core.sys.stdin")
     @patch("ufmt.core.sys.stdout")
-    def test_ufmt_stdin(self, stdout_mock, stdin_mock):
+    def test_ufmt_stdin(self, stdout_mock: Mock, stdin_mock: Mock) -> None:
         with self.subTest("check"):
             stdin_mock.buffer = stdin = io.BytesIO()
             stdout_mock.buffer = stdout = io.BytesIO()
@@ -489,7 +491,7 @@ class CoreTest(TestCase):
             result = ufmt_stdin(path, dry_run=True, diff=True)
             self.assertIsNotNone(result.diff)
             self.assertRegex(
-                result.diff, r"--- hello.world\.py\n\+\+\+ hello.world\.py"
+                result.diff or "", r"--- hello.world\.py\n\+\+\+ hello.world\.py"
             )
             stdout.seek(0)
             self.assertEqual(b"", stdout.read())
@@ -506,11 +508,11 @@ class CoreTest(TestCase):
             stdout.seek(0)
             self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), stdout.read())
 
-    def test_ufmt_paths(self):
+    def test_ufmt_paths(self) -> None:
         with TemporaryDirectory() as td:
-            td = Path(td)
-            f1 = td / "bar.py"
-            sd = td / "foo"
+            tdp = Path(td)
+            f1 = tdp / "bar.py"
+            sd = tdp / "foo"
             sd.mkdir()
             f2 = sd / "baz.py"
             f3 = sd / "frob.py"
@@ -528,7 +530,7 @@ class CoreTest(TestCase):
                 with self.subTest("non-existent paths"):
                     results = list(
                         ufmt.ufmt_paths(
-                            [(td / "fake.py"), (td / "another.py")], dry_run=True
+                            [(tdp / "fake.py"), (tdp / "another.py")], dry_run=True
                         )
                     )
                     self.assertEqual([], results)
@@ -638,7 +640,7 @@ class CoreTest(TestCase):
                     file_wrapper.reset_mock()
 
     @patch("ufmt.core.ufmt_stdin")
-    def test_ufmt_paths_stdin(self, stdin_mock):
+    def test_ufmt_paths_stdin(self, stdin_mock: Mock) -> None:
         stdin_mock.return_value = Result(path=STDIN, changed=True)
 
         with self.subTest("no name"):
@@ -679,13 +681,18 @@ class CoreTest(TestCase):
 
     @patch("ufmt.core.sys.stdin")
     @patch("ufmt.core.sys.stdout")
-    def test_ufmt_paths_stdin_resolves(self, stdout_mock, stdin_mock):
+    def test_ufmt_paths_stdin_resolves(
+        self, stdout_mock: Mock, stdin_mock: Mock
+    ) -> None:
         stdin_mock.buffer = io.BytesIO(POORLY_FORMATTED_CODE.encode())
         stdout_mock.buffer = stdout = io.BytesIO()
 
-        def fake_preprocessor(path, content, encoding):
+        def fake_preprocessor(
+            path: Path, content: FileContent, encoding: Encoding
+        ) -> FileContent:
             # ensure the fake path resolves correctly (#94)
             path.resolve()
+            return content
 
         result = list(ufmt.ufmt_paths([STDIN]))
         expected = [Result(Path("stdin"), changed=True, written=True)]
@@ -695,10 +702,10 @@ class CoreTest(TestCase):
         self.assertListEqual(expected, result)
         self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), output)
 
-    def test_ufmt_paths_config(self):
+    def test_ufmt_paths_config(self) -> None:
         with TemporaryDirectory() as td:
-            td = Path(td).resolve()
-            md = td / "foo"
+            tdp = Path(td).resolve()
+            md = tdp / "foo"
             md.mkdir()
             f1 = md / "__init__.py"
             f2 = md / "foo.py"
@@ -709,12 +716,12 @@ class CoreTest(TestCase):
             for f in f1, f2, f3:
                 f.write_text(POORLY_FORMATTED_CODE)
 
-            pyproj = td / "pyproject.toml"
+            pyproj = tdp / "pyproject.toml"
             pyproj.write_text(FAKE_CONFIG)
 
             file_wrapper = Mock(name="ufmt_file", wraps=ufmt.ufmt_file)
             with patch("ufmt.core.ufmt_file", file_wrapper):
-                list(ufmt.ufmt_paths([td]))
+                list(ufmt.ufmt_paths([tdp]))
                 file_wrapper.assert_has_calls(
                     [
                         call(
@@ -735,7 +742,7 @@ class CoreTest(TestCase):
                 self.assertEqual(f2.read_text(), CORRECTLY_FORMATTED_CODE)
                 self.assertEqual(f3.read_text(), POORLY_FORMATTED_CODE)
 
-    def test_e2e_empty_files(self):
+    def test_e2e_empty_files(self) -> None:
         with TemporaryDirectory() as td:
             tdp = Path(td).resolve()
             foo = tdp / "foo.py"
@@ -753,10 +760,10 @@ class CoreTest(TestCase):
             ]
             self.assertListEqual(expected, results)
 
-    def test_e2e_return_bytes(self):
+    def test_e2e_return_bytes(self) -> None:
         with TemporaryDirectory() as td:
-            td = Path(td).resolve()
-            foo = td / "foo.py"
+            tdp = Path(td).resolve()
+            foo = tdp / "foo.py"
 
             with self.subTest("unix newlines"):
                 foo.write_bytes(POORLY_FORMATTED_CODE.encode())

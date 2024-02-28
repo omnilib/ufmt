@@ -23,6 +23,8 @@ from .types import (
 )
 
 __all__ = [
+    "__author__",
+    "__version__",
     "BlackConfig",
     "BlackConfigFactory",
     "Encoding",

@@ -82,7 +82,7 @@ skip_covered = true
 
 [tool.mypy]
 python_version = "3.8"
-# strict = true
+strict = true
 ignore_missing_imports = true
 
 [tool.thx]
