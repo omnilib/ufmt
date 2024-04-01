@@ -39,7 +39,7 @@ dev = [
     "coverage==7.4.1",
     "flit==3.9.0",
     "flake8==7.0.0",
-    "mypy==1.8.0",
+    "mypy==1.9.0",
     "ruff-api==0.0.3",
     "usort==1.0.8.post1",
 ]
