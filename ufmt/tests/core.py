@@ -221,7 +221,10 @@ class CoreTest(TestCase):
             black_mock.assert_not_called()
 
     @patch("ufmt.core.usort", wraps=usort.usort)
-    def test_ufmt_bytes_alternate_sorter(self, usort_mock: Mock) -> None:
+    @patch("ufmt.core.ruff_api.isort_string", wraps=ruff_api.isort_string)
+    def test_ufmt_bytes_alternate_sorter(
+        self, ruff_mock: Mock, usort_mock: Mock
+    ) -> None:
         black_config = BlackConfig()
         usort_config = UsortConfig()
 
@@ -248,6 +251,19 @@ class CoreTest(TestCase):
             )
             self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
             usort_mock.assert_called_once()
+
+        with self.subTest("ruff-api"):
+            usort_mock.reset_mock()
+            result = ufmt.ufmt_bytes(
+                Path("foo.py"),
+                POORLY_FORMATTED_CODE.encode(),
+                ufmt_config=UfmtConfig(sorter=Sorter.ruff_api),
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
+            usort_mock.assert_not_called()
+            ruff_mock.assert_called_once()
 
         with self.subTest("skip"):
             usort_mock.reset_mock()
