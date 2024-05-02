@@ -44,7 +44,7 @@ dev = [
     "usort==1.0.8.post1",
 ]
 docs = [
-    "sphinx==7.2.6",
+    "sphinx==7.3.7",
     "sphinx-mdinclude==0.6.0",
 ]
 
