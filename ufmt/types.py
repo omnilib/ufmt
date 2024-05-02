@@ -66,6 +66,18 @@ class Sorter(Enum):
     usort = "usort"
     """Use µsort (default)."""
 
+    ruff_api = "ruff-api"
+    """
+    **Experimental:**
+    Use Ruff's isort lint rules via unofficial
+    `ruff-api <https://pypi.org/project/ruff-api>`_ extension.
+
+    .. note::
+        This implementation still depends on and uses the ``[tool.usort]`` configuration
+        table from ``pyproject.toml`` rather than Ruff's own configuration options.
+        This may change in future updates.
+    """
+
 
 @dataclass
 class UfmtConfig:

@@ -18,6 +18,7 @@ import black.report
 from moreorless import unified_diff
 from trailrunner import Trailrunner
 from usort import usort
+from usort.config import CAT_FIRST_PARTY, CAT_STANDARD_LIBRARY
 
 try:
     import ruff_api
@@ -107,6 +108,23 @@ def ufmt_bytes(
         if result.error:
             raise result.error
         content = result.output
+    elif ufmt_config.sorter == Sorter.ruff_api:
+        ruff_isort_options = ruff_api.SortOptions(
+            first_party_modules=[
+                imp
+                for imp, category in usort_config.known.items()
+                if category == CAT_FIRST_PARTY
+            ],
+            standard_library_modules=[
+                imp
+                for imp, category in usort_config.known.items()
+                if category == CAT_STANDARD_LIBRARY
+            ],
+        )
+        content_str = ruff_api.isort_string(
+            path.as_posix(), content.decode(encoding), options=ruff_isort_options
+        )
+        content = content_str.encode(encoding)
     elif ufmt_config.sorter == Sorter.skip:
         pass
     else:
@@ -127,7 +145,7 @@ def ufmt_bytes(
         except black.report.NothingChanged:
             content = result.output
     elif ufmt_config.formatter == Formatter.ruff_api:
-        options = ruff_api.FormatOptions(
+        ruff_format_options = ruff_api.FormatOptions(
             target_version=str(
                 black_config.target_versions.pop()
                 if black_config.target_versions
@@ -137,7 +155,7 @@ def ufmt_bytes(
             preview=black_config.preview,
         )
         content_str = ruff_api.format_string(
-            path.as_posix(), content_str, options=options
+            path.as_posix(), content_str, options=ruff_format_options
         )
     else:
         raise ValueError(f"{ufmt_config.formatter!r} is not a supported formatter")

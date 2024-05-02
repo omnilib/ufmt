@@ -77,7 +77,7 @@ Options available are described as follows:
       [tool.ufmt]
       sorter = "usort"
 
-    See :class:`~ufmt.types.Formatter` for list of supported choices.
+    See :class:`~ufmt.types.Sorter` for list of supported choices.
 
 
 Integrations
