@@ -88,6 +88,7 @@ Integrations
 - `GitHub Actions`_
 - `pre-commit`_
 - `Visual Studio Code`_
+- `Generic LSP Server`_
 
 
 GitHub Actions
@@ -252,3 +253,26 @@ For more details, or to install the extension, see the Visual Studio Marketplace
 .. image:: https://img.shields.io/badge/-Install%20Now-107C10?style=for-the-badge&logo=visualstudiocode
     :alt: Install VS Code extension now
     :target: vscode:extension/omnilib.ufmt
+
+
+Generic LSP Server
+~~~~~~~~~~~~~~~~~~
+
+**Experimental:**
+µfmt includes a generic LSP formatting server that can be used with any editor
+or IDE that supports the `Language Server Protocol`__.
+
+.. __: https://microsoft.github.io/language-server-protocol/specifications/specification-current/
+
+Extra dependencies are needed to run the µfmt LSP, and can be installed with
+the ``[lsp]`` package extras with pip:
+
+.. code-block:: shell-session
+
+    $ pip install ufmt[lsp]
+
+The generic LSP can then be started using the ``lsp`` subcommand:
+
+.. code-block:: shell-session
+
+    $ ufmt lsp [--tcp | --ws] [--port <port>]

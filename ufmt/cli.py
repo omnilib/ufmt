@@ -176,3 +176,23 @@ def format(ctx: click.Context, names: List[str]) -> None:
     _, error = echo_results(results, quiet=options.quiet)
     if error:
         ctx.exit(1)
+
+
+@main.command()
+@click.pass_context
+@click.option("--tcp", is_flag=True)
+@click.option("--ws", is_flag=True)
+@click.option("--port", type=int, default=8971)
+def lsp(ctx: click.Context, tcp: bool, ws: bool, port: int) -> None:
+    """Experimental: start an LSP formatting server"""
+    from .lsp import ufmt_lsp
+
+    options: Options = ctx.obj
+    server = ufmt_lsp(root=options.root)
+
+    if tcp:
+        server.start_tcp("localhost", port)
+    elif ws:
+        server.start_ws("localhost", port)
+    else:
+        server.start_io()

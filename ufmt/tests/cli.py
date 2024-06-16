@@ -487,3 +487,26 @@ class CliTest(TestCase):
             self.assertIn("1 file formatted, 1 file already formatted", result.stderr)
             self.assertEqual(POORLY_FORMATTED_CODE, beta.read_text())
             self.assertEqual(CORRECTLY_FORMATTED_CODE, kappa.read_text())
+
+    @patch("ufmt.lsp.ufmt_lsp")  # dynamic import, patch at definition
+    def test_lsp(self, lsp_mock: Mock) -> None:
+        with self.subTest("default"):
+            lsp_mock.reset_mock()
+            self.runner.invoke(main, ["lsp"])
+
+            lsp_mock.assert_called_with(root=None)
+            lsp_mock.return_value.start_io.assert_called_with()
+
+        with self.subTest("tcp"):
+            lsp_mock.reset_mock()
+            self.runner.invoke(main, ["lsp", "--tcp", "--port", "4567"])
+
+            lsp_mock.assert_called_with(root=None)
+            lsp_mock.return_value.start_tcp.assert_called_with("localhost", 4567)
+
+        with self.subTest("ws"):
+            lsp_mock.reset_mock()
+            self.runner.invoke(main, ["lsp", "--ws", "--port", "8765"])
+
+            lsp_mock.assert_called_with(root=None)
+            lsp_mock.return_value.start_ws.assert_called_with("localhost", 8765)
