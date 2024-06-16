@@ -37,7 +37,7 @@ ruff = [
     "ruff-api>=0.0.5",
 ]
 dev = [
-    "attribution==1.7.1",
+    "attribution==1.8.0",
     "black==24.4.2",
     "coverage==7.5.3",
     "flit==3.9.0",
