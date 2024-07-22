@@ -18,6 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 import datetime
+import os
 
 project = "µfmt"
 copyright = f"{datetime.date.today().year}, Amethyst Reese"
@@ -58,6 +59,9 @@ intersphinx_mapping = {
     "usort": ("https://usort.readthedocs.io/en/latest", None),
 }
 master_doc = "index"
+
+# Set canonical URL from the Read the Docs Domain
+html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL", "")
 
 # -- Options for HTML output -------------------------------------------------
 
