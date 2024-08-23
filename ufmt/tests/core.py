@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
-from unittest.mock import call, Mock, patch
+from unittest.mock import ANY, call, Mock, patch
 
 import black
 import ruff_api
@@ -250,7 +250,10 @@ class CoreTest(TestCase):
                 usort_config=usort_config,
             )
             self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
-            usort_mock.assert_called_once()
+            usort_mock.assert_called_with(
+                POORLY_FORMATTED_CODE.encode(), usort_config, Path("foo.py")
+            )
+            ruff_mock.assert_not_called()
 
         with self.subTest("ruff-api"):
             usort_mock.reset_mock()
@@ -263,7 +266,9 @@ class CoreTest(TestCase):
             )
             self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
             usort_mock.assert_not_called()
-            ruff_mock.assert_called_once()
+            ruff_mock.assert_called_with(
+                "foo.py", POORLY_FORMATTED_CODE, options=ANY, root=None
+            )
 
         with self.subTest("skip"):
             usort_mock.reset_mock()
