@@ -122,7 +122,14 @@ def ufmt_bytes(
             ],
         )
         content_str = ruff_api.isort_string(
-            path.as_posix(), content.decode(encoding), options=ruff_isort_options
+            path.as_posix(),
+            content.decode(encoding),
+            options=ruff_isort_options,
+            root=(
+                ufmt_config.project_root.as_posix()
+                if ufmt_config.project_root
+                else None
+            ),
         )
         content = content_str.encode(encoding)
     elif ufmt_config.sorter == Sorter.skip:

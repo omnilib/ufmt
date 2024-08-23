@@ -34,7 +34,7 @@ lsp = [
     "pygls >= 1.3",
 ]
 ruff = [
-    "ruff-api>=0.0.5",
+    "ruff-api>=0.0.8",
 ]
 dev = [
     "attribution==1.8.0",
