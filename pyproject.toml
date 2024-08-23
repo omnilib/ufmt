@@ -49,7 +49,7 @@ dev = [
 ]
 docs = [
     "sphinx==8.0.2",
-    "sphinx-mdinclude==0.6.1",
+    "sphinx-mdinclude==0.6.2",
 ]
 
 [project.urls]
