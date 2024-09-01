@@ -4,7 +4,7 @@
 import os
 import tokenize
 from pathlib import Path
-from typing import Tuple
+from typing import Optional, Tuple
 
 from black.files import find_pyproject_toml, parse_pyproject_toml
 from black.mode import TargetVersion
@@ -32,6 +32,21 @@ def make_black_config(path: Path) -> BlackConfig:
     config = {name: value for name, value in config.items() if name in names}
 
     return BlackConfig(**config)
+
+
+def normalize_content(
+    content: FileContent, newline: Optional[Newline] = None
+) -> Tuple[FileContent, Newline]:
+    """
+    Detect bytes content line ending style and convert to UNIX style.
+
+    No-op if ``newline`` is detected or given as ``b"\\n"``.
+    """
+    if newline is None:
+        newline = b"\r\n" if content.find(b"\r\n", 0, 1000) > -1 else b"\n"
+    if newline != b"\n":
+        content = content.replace(newline, b"\n")
+    return content, newline
 
 
 def normalize_result(content: FileContent, newline: Newline) -> FileContent:
@@ -64,7 +79,7 @@ def read_file(path: Path) -> Tuple[FileContent, Encoding, Newline]:
 
         buf.seek(0)
         content = buf.read()
-        content = content.replace(newline, b"\n")
+        content, newline = normalize_content(content, newline)
         return content, encoding, newline
 
 
