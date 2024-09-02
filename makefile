@@ -7,19 +7,24 @@ else
     ACTIVATE:=.venv/bin/activate
 endif
 
+UV:=$(shell uv --version)
+ifdef UV
+	VENV:=uv venv
+	PIP:=uv pip
+else
+	VENV:=python -m venv
+	PIP:=python -m pip
+endif
+
 .venv:
-	python -m venv .venv
+	$(VENV) .venv
+
+venv: .venv
 	source $(ACTIVATE) && make install
 	echo 'run `source $(ACTIVATE)` to use virtualenv'
 
-venv: .venv
-
 install:
-	python -m pip install -U pip
-	python -m pip install -Ue .[$(EXTRAS)]
-
-release: lint test clean
-	flit publish
+	$(PIP) install -Ue .[$(EXTRAS)]
 
 format:
 	python -m ufmt format $(SRCS)
