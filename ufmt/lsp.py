@@ -31,7 +31,7 @@ from .types import (
     UsortConfig,
     UsortConfigFactory,
 )
-from .util import make_black_config
+from .util import make_black_config, normalize_content, normalize_result
 
 ServerType = Literal["stdin", "tcp", "ws"]
 
@@ -111,7 +111,7 @@ def ufmt_lsp(  # pragma: nocover
 
         # XXX: we're assuming everything is UTF-8 because LSP doesn't track encodings...
         encoding: Encoding = "utf-8"
-        content = document.source.encode(encoding)
+        content, newline = normalize_content(document.source.encode(encoding))
 
         result = _wrap_ufmt_bytes(
             path,
@@ -137,7 +137,7 @@ def ufmt_lsp(  # pragma: nocover
                     Position(0, 0),
                     Position(len(document.lines), 0),
                 ),
-                result.after.decode(encoding),
+                normalize_result(result.after, newline).decode(encoding),
             ),
         ]
 

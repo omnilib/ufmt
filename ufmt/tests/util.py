@@ -55,6 +55,36 @@ class UtilTest(TestCase):
             with self.subTest("line_length"):
                 self.assertEqual(mode.line_length, 87)
 
+    def test_normalize_content(self) -> None:
+        cases = (
+            (b"hello world", None, (b"hello world", b"\n")),
+            (b"hello\nworld\n", None, (b"hello\nworld\n", b"\n")),
+            (b"hello\r\nworld\r\n", None, (b"hello\nworld\n", b"\r\n")),
+            (b"hello world", b"\n", (b"hello world", b"\n")),
+            (b"hello\nworld\n", b"\n", (b"hello\nworld\n", b"\n")),
+            (b"hello\r\nworld\r\n", b"\n", (b"hello\r\nworld\r\n", b"\n")),
+            (b"hello world", b"\r\n", (b"hello world", b"\r\n")),
+            (b"hello\nworld\n", b"\r\n", (b"hello\nworld\n", b"\r\n")),
+            (b"hello\r\nworld\r\n", b"\r\n", (b"hello\nworld\n", b"\r\n")),
+        )
+        for idx, (content, newline, expected) in enumerate(cases):
+            with self.subTest(idx):
+                self.assertEqual(
+                    expected, ufmt.util.normalize_content(content, newline)
+                )
+
+    def test_normalize_result(self) -> None:
+        cases = (
+            (b"hello world", b"\n", b"hello world"),
+            (b"hello\nworld\n", b"\n", b"hello\nworld\n"),
+            (b"hello\r\nworld\r\n", b"\n", b"hello\r\nworld\r\n"),
+            (b"hello world", b"\r\n", b"hello world"),
+            (b"hello\nworld\n", b"\r\n", b"hello\r\nworld\r\n"),
+        )
+        for idx, (content, newline, expected) in enumerate(cases):
+            with self.subTest(idx):
+                self.assertEqual(expected, ufmt.util.normalize_result(content, newline))
+
     def test_read_file(self) -> None:
         with TemporaryDirectory() as td:
             tdp = Path(td).resolve()
