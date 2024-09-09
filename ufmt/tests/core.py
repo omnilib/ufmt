@@ -822,3 +822,6 @@ class CoreTest(TestCase):
                     )
                 ]
                 self.assertEqual(expected, results)
+
+    def test_fake_thing(self):
+        pass
