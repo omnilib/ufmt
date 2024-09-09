@@ -32,7 +32,9 @@ jobs:
           allow-prereleases: true
       - uses: astral-sh/setup-uv@v2
         with:
+          enable-cache: true
           cache-dependency-glob: pyproject.toml
+          cache-suffix: ${{ matrix.python-version }}
       - name: Install
         run: make EXTRAS=dev install
       - name: Test
@@ -50,6 +52,7 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@v2
         with:
+          enable-cache: true
           cache-dependency-glob: pyproject.toml
       - name: Install
         run: make EXTRAS=dev install
