@@ -150,7 +150,7 @@ def ufmt_bytes(
                 mode=black_config,
             )
         except black.report.NothingChanged:
-            content = result.output
+            pass
     elif ufmt_config.formatter == Formatter.ruff_api:
         ruff_format_options = ruff_api.FormatOptions(
             target_version=str(
