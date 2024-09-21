@@ -255,6 +255,16 @@ class CoreTest(TestCase):
             )
             ruff_mock.assert_not_called()
 
+            result = ufmt.ufmt_bytes(
+                Path("foo.py"),
+                CORRECTLY_FORMATTED_CODE.encode(),
+                ufmt_config=UfmtConfig(sorter=Sorter.skip),
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            expected = CORRECTLY_FORMATTED_CODE
+            self.assertEqual(expected.encode(), result)
+
         with self.subTest("ruff-api"):
             usort_mock.reset_mock()
             result = ufmt.ufmt_bytes(
@@ -270,6 +280,16 @@ class CoreTest(TestCase):
                 "foo.py", POORLY_FORMATTED_CODE, options=ANY, root=None
             )
 
+            result = ufmt.ufmt_bytes(
+                Path("foo.py"),
+                CORRECTLY_FORMATTED_CODE.encode(),
+                ufmt_config=UfmtConfig(sorter=Sorter.skip),
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            expected = CORRECTLY_FORMATTED_CODE
+            self.assertEqual(expected.encode(), result)
+
         with self.subTest("skip"):
             usort_mock.reset_mock()
             result = ufmt.ufmt_bytes(
@@ -282,6 +302,16 @@ class CoreTest(TestCase):
             expected = POORLY_FORMATTED_CODE[:64] + CORRECTLY_FORMATTED_CODE[65:]
             self.assertEqual(expected.encode(), result)
             usort_mock.assert_not_called()
+
+            result = ufmt.ufmt_bytes(
+                Path("foo.py"),
+                CORRECTLY_FORMATTED_CODE.encode(),
+                ufmt_config=UfmtConfig(sorter=Sorter.skip),
+                black_config=black_config,
+                usort_config=usort_config,
+            )
+            expected = CORRECTLY_FORMATTED_CODE
+            self.assertEqual(expected.encode(), result)
 
         with self.subTest("unsupported sorter"):
             with self.assertRaisesRegex(
