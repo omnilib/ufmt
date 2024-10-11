@@ -2,7 +2,7 @@
 
 ## Setup
 
-Create a fresh development enviroment, and install the
+Create a fresh development environment, and install the
 appropriate tools and dependencies:
 
     $ make venv
