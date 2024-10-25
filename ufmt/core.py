@@ -110,6 +110,7 @@ def ufmt_bytes(
         content = result.output
     elif ufmt_config.sorter == Sorter.ruff_api:
         ruff_isort_options = ruff_api.SortOptions(
+            # match µsort configuration
             first_party_modules=[
                 imp
                 for imp, category in usort_config.known.items()
@@ -120,6 +121,11 @@ def ufmt_bytes(
                 for imp, category in usort_config.known.items()
                 if category == CAT_STANDARD_LIBRARY
             ],
+            detect_same_package=usort_config.first_party_detection,
+            # match µsort behavior for now
+            case_sensitive=False,
+            combine_as_imports=True,
+            order_by_type=False,
         )
         content_str = ruff_api.isort_string(
             path.as_posix(),
