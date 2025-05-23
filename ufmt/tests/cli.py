@@ -4,6 +4,7 @@
 import os
 import platform
 from concurrent.futures import ThreadPoolExecutor
+from importlib.metadata import version
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import skipIf, TestCase
@@ -12,6 +13,7 @@ from unittest.mock import call, Mock, patch
 import trailrunner
 from click.testing import CliRunner
 from libcst import ParserSyntaxError
+from packaging.version import Version
 
 from ufmt.cli import echo_results, main
 from ufmt.types import Result
@@ -22,7 +24,10 @@ from .core import CORRECTLY_FORMATTED_CODE, POORLY_FORMATTED_CODE
 @patch.object(trailrunner.core.Trailrunner, "DEFAULT_EXECUTOR", ThreadPoolExecutor)
 class CliTest(TestCase):
     def setUp(self) -> None:
-        self.runner = CliRunner(mix_stderr=False)
+        if Version(version("click")) >= Version("8.2.0"):
+            self.runner = CliRunner()
+        else:
+            self.runner = CliRunner(mix_stderr=False)
         self.cwd = os.getcwd()
         self.td = TemporaryDirectory()
         self.tdp = Path(self.td.name).resolve()
