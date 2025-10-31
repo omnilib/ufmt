@@ -10,11 +10,12 @@ from lsprotocol.types import (
     MessageType,
     Position,
     Range,
+    ShowMessageParams,
     TEXT_DOCUMENT_FORMATTING,
     TextEdit,
 )
 
-from pygls.server import LanguageServer
+from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
 from .__version__ import __version__
@@ -126,8 +127,10 @@ def ufmt_lsp(  # pragma: nocover
         )
 
         if result.error:
-            ls.show_message(
-                f"Formatting failed: {str(result.error)}", MessageType.Error
+            ls.window_show_message(
+                ShowMessageParams(
+                    MessageType.Error, f"Formatting failed: {str(result.error)}"
+                )
             )
             return []
 

@@ -1,7 +1,7 @@
 # Copyright Amethyst Reese
 # Licensed under the MIT license
 
-from io import StringIO
+from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Timer
@@ -17,8 +17,8 @@ class LspTest(TestCase):
         self.addCleanup(self.td.cleanup)
 
     def test_startup_shutdown(self) -> None:
-        stdin = StringIO()
-        stdout = StringIO()
+        stdin = BytesIO()
+        stdout = BytesIO()
 
         server = ufmt_lsp(root=self.tdp)
 
