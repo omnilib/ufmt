@@ -64,7 +64,7 @@ jobs:
           path: dist
   
   publish:
-    needs: build
+    needs: [build, test]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
