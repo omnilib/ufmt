@@ -31,7 +31,7 @@ dependencies = [
 
 [project.optional-dependencies]
 lsp = [
-    "pygls >= 1.3, <2",
+    "pygls>=2",
 ]
 ruff = [
     "ruff-api>=0.1.0",
