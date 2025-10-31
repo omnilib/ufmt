@@ -22,7 +22,7 @@ from .core import CORRECTLY_FORMATTED_CODE, POORLY_FORMATTED_CODE
 @patch.object(trailrunner.core.Trailrunner, "DEFAULT_EXECUTOR", ThreadPoolExecutor)
 class CliTest(TestCase):
     def setUp(self) -> None:
-        self.runner = CliRunner(mix_stderr=False)
+        self.runner = CliRunner()
         self.cwd = os.getcwd()
         self.td = TemporaryDirectory()
         self.tdp = Path(self.td.name).resolve()
