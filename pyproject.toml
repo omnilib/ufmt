@@ -45,7 +45,7 @@ dev = [
     "mypy==1.19.0",
     "pygls==2.0.0",
     "ruff-api==0.1.0",
-    "usort==1.0.8.post1",
+    "usort==1.1.0",
 ]
 docs = [
     "sphinx==8.1.3",
