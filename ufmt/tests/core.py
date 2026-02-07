@@ -13,6 +13,7 @@ import black
 import ruff_api
 import trailrunner
 import usort
+from black.mode import TargetVersion
 from libcst import ParserSyntaxError
 
 import ufmt
@@ -209,7 +210,7 @@ class CoreTest(TestCase):
         with self.subTest("target version"):
             ruff_mock.reset_mock()
             black_config_tv = BlackConfig(
-                target_versions={black.TargetVersion.PY312},
+                target_versions={TargetVersion.PY312},
             )
             result = ufmt.ufmt_bytes(
                 Path("foo.py"),
@@ -223,9 +224,7 @@ class CoreTest(TestCase):
             (_, call_kwargs) = ruff_mock.call_args
             self.assertEqual(call_kwargs["options"].target_version, "py312")
             # verify target_versions was not mutated
-            self.assertEqual(
-                black_config_tv.target_versions, {black.TargetVersion.PY312}
-            )
+            self.assertEqual(black_config_tv.target_versions, {TargetVersion.PY312})
             black_mock.assert_not_called()
 
         with self.subTest("unsupported formatter"):
