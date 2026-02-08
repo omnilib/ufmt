@@ -43,7 +43,7 @@ dev = [
     "coverage>=7",
     "flake8==7.3.0",
     "mypy==1.19.0",
-    "pygls==2.0.0",
+    "pygls==2.0.1",
     "ruff-api==0.2.1",
     "usort==1.0.8.post1",
 ]
