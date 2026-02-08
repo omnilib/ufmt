@@ -15,7 +15,6 @@ from libcst import ParserSyntaxError
 
 from ufmt.cli import echo_results, main
 from ufmt.types import Result
-
 from .core import CORRECTLY_FORMATTED_CODE, POORLY_FORMATTED_CODE
 
 

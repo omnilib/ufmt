@@ -14,7 +14,6 @@ from lsprotocol.types import (
     TEXT_DOCUMENT_FORMATTING,
     TextEdit,
 )
-
 from pygls.lsp.server import LanguageServer
 from pygls.workspace import TextDocument
 
