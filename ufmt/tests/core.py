@@ -221,7 +221,7 @@ class CoreTest(TestCase):
             )
             self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), result)
             ruff_mock.assert_called_once()
-            (_, call_kwargs) = ruff_mock.call_args
+            _, call_kwargs = ruff_mock.call_args
             self.assertEqual(call_kwargs["options"].target_version, "py312")
             # verify target_versions was not mutated
             self.assertEqual(black_config_tv.target_versions, {TargetVersion.PY312})
@@ -234,7 +234,7 @@ class CoreTest(TestCase):
                 ufmt.ufmt_bytes(
                     Path("foo.pyi"),
                     POORLY_FORMATTED_STUB.encode(),
-                    ufmt_config=UfmtConfig(formatter="garbage"),  # type:ignore
+                    ufmt_config=UfmtConfig(formatter="garbage"),  # type: ignore
                     black_config=black_config,
                     usort_config=usort_config,
                 )
@@ -341,7 +341,7 @@ class CoreTest(TestCase):
                 ufmt.ufmt_bytes(
                     Path("foo.py"),
                     POORLY_FORMATTED_CODE.encode(),
-                    ufmt_config=UfmtConfig(sorter="garbage"),  # type:ignore
+                    ufmt_config=UfmtConfig(sorter="garbage"),  # type: ignore
                     black_config=black_config,
                     usort_config=usort_config,
                 )
