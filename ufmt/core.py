@@ -158,12 +158,12 @@ def ufmt_bytes(
         except black.report.NothingChanged:
             pass
     elif ufmt_config.formatter == Formatter.ruff_api:
+        target_version = None
+        if black_config.target_versions:
+            tv = next(iter(black_config.target_versions))
+            target_version = tv.name.lower()  # "PY312" -> "py312"
         ruff_format_options = ruff_api.FormatOptions(
-            target_version=str(
-                black_config.target_versions.pop()
-                if black_config.target_versions
-                else {black.mode.TargetVersion.PY38}
-            ),
+            target_version=target_version,
             line_width=black_config.line_length,
             preview=black_config.preview,
         )
