@@ -34,7 +34,7 @@ lsp = [
     "pygls>=2",
 ]
 ruff = [
-    "ruff-api>=0.1.0",
+    "ruff-api>=0.2.0",
 ]
 dev = [
     "attribution==1.8.0",
@@ -44,7 +44,7 @@ dev = [
     "flake8==7.3.0",
     "mypy==1.19.0",
     "pygls==2.0.0",
-    "ruff-api==0.1.0",
+    "ruff-api==0.2.1",
     "usort==1.0.8.post1",
 ]
 docs = [
@@ -93,7 +93,7 @@ ignore_missing_imports = true
 default = ["docs", "test", "lint", "coverage"]
 module = "ufmt"
 srcs = "ufmt"
-python_versions = ["3.10", "3.11", "3.12", "3.13"]
+python_versions = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 watch_paths = ["README.md", "docs", "ufmt"]
 
 [tool.thx.jobs]
