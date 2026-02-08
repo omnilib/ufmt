@@ -29,15 +29,13 @@ class ConfigTest(TestCase):
         return super().subTest(*args, **kwargs)
 
     def test_ufmt_config(self) -> None:
-        fake_config = dedent(
-            """
+        fake_config = dedent("""
             [tool.ufmt]
             excludes = [
                 "a",
                 "b",
             ]
-            """
-        )
+            """)
 
         foo = self.td / "foo"
         foo.mkdir()
@@ -115,14 +113,10 @@ class ConfigTest(TestCase):
     @patch("ufmt.config.LOG")
     def test_invalid_config(self, log_mock: Mock) -> None:
         with self.subTest("string"):
-            self.pyproject.write_text(
-                dedent(
-                    """
+            self.pyproject.write_text(dedent("""
                     [tool]
                     ufmt = "hello"
-                    """
-                )
-            )
+                    """))
             expected = UfmtConfig(project_root=self.td, pyproject_path=self.pyproject)
             result = load_config(self.td / "fake.py")
             self.assertEqual(expected, result)
@@ -131,14 +125,10 @@ class ConfigTest(TestCase):
             log_mock.reset_mock()
 
         with self.subTest("array"):
-            self.pyproject.write_text(
-                dedent(
-                    """
+            self.pyproject.write_text(dedent("""
                     [[tool.ufmt]]
                     excludes = ["fixtures/"]
-                    """
-                )
-            )
+                    """))
             expected = UfmtConfig(project_root=self.td, pyproject_path=self.pyproject)
             result = load_config(self.td / "fake.py")
             self.assertEqual(expected, result)
@@ -147,15 +137,11 @@ class ConfigTest(TestCase):
             log_mock.reset_mock()
 
         with self.subTest("extra"):
-            self.pyproject.write_text(
-                dedent(
-                    """
+            self.pyproject.write_text(dedent("""
                     [tool.ufmt]
                     unknown_element = true
                     hello_world = "my name is"
-                    """
-                )
-            )
+                    """))
             expected = UfmtConfig(project_root=self.td, pyproject_path=self.pyproject)
             result = load_config(self.td / "fake.py")
             self.assertEqual(expected, result)
@@ -166,55 +152,39 @@ class ConfigTest(TestCase):
             log_mock.reset_mock()
 
         with self.subTest("unsupported formatter"):
-            self.pyproject.write_text(
-                dedent(
-                    """
+            self.pyproject.write_text(dedent("""
                     [tool.ufmt]
                     formatter = "garbage"
-                    """
-                )
-            )
+                    """))
             with self.assertRaisesRegex(
                 ValueError, "'garbage' is not a valid Formatter"
             ):
                 load_config(self.td / "fake.py")
 
         with self.subTest("unsupported sorter"):
-            self.pyproject.write_text(
-                dedent(
-                    """
+            self.pyproject.write_text(dedent("""
                     [tool.ufmt]
                     sorter = "garbage"
-                    """
-                )
-            )
+                    """))
             with self.assertRaisesRegex(ValueError, "'garbage' is not a valid Sorter"):
                 load_config(self.td / "fake.py")
 
     @patch("ufmt.config.LOG")
     def test_config_excludes(self, log_mock: Mock) -> None:
         with self.subTest("missing"):
-            self.pyproject.write_text(
-                dedent(
-                    """
+            self.pyproject.write_text(dedent("""
                     [tool.ufmt]
-                    """
-                )
-            )
+                    """))
             expected = UfmtConfig(project_root=self.td, pyproject_path=self.pyproject)
             result = load_config(self.td / "fake.py")
             self.assertEqual(expected, result)
             log_mock.assert_not_called()
 
         with self.subTest("empty"):
-            self.pyproject.write_text(
-                dedent(
-                    """
+            self.pyproject.write_text(dedent("""
                     [tool.ufmt]
                     excludes = []
-                    """
-                )
-            )
+                    """))
             expected = UfmtConfig(
                 project_root=self.td, pyproject_path=self.pyproject, excludes=[]
             )
@@ -223,14 +193,10 @@ class ConfigTest(TestCase):
             log_mock.assert_not_called()
 
         with self.subTest("list"):
-            self.pyproject.write_text(
-                dedent(
-                    """
+            self.pyproject.write_text(dedent("""
                     [tool.ufmt]
                     excludes = ["fixtures/"]
-                    """
-                )
-            )
+                    """))
             expected = UfmtConfig(
                 project_root=self.td,
                 pyproject_path=self.pyproject,
@@ -241,14 +207,10 @@ class ConfigTest(TestCase):
             log_mock.assert_not_called()
 
         with self.subTest("string"):
-            self.pyproject.write_text(
-                dedent(
-                    """
+            self.pyproject.write_text(dedent("""
                     [tool.ufmt]
                     excludes = "fixtures/"
-                    """
-                )
-            )
+                    """))
             with self.assertRaisesRegex(
                 ValueError, "excludes must be a list of strings"
             ):

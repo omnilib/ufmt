@@ -23,7 +23,7 @@ class LspTest(TestCase):
         server = ufmt_lsp(root=self.tdp)
 
         def times_up() -> None:
-            server.shutdown()  # type:ignore[no-untyped-call]
+            server.shutdown()  # type: ignore[no-untyped-call]
             raise RuntimeError("had to forcefully shutdown lsp")
 
         timer = Timer(5, times_up)
