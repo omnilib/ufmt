@@ -385,7 +385,7 @@ def ufmt_stdin(
             result.diff = pattern.sub(replacement, result.diff)
 
         # write to stdout if not check/diff mode
-        if not dry_run:
+        if not dry_run and not result.error:
             content = temp_path.read_bytes()
             sys.stdout.buffer.write(content)
             sys.stdout.buffer.flush()

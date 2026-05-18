@@ -580,6 +580,21 @@ class CoreTest(TestCase):
             stdout.seek(0)
             self.assertEqual(CORRECTLY_FORMATTED_CODE.encode(), stdout.read())
 
+        with self.subTest("error no output"):
+            stdin_mock.buffer = stdin = io.BytesIO()
+            stdout_mock.buffer = stdout = io.BytesIO()
+
+            stdin.write(INVALID_SYNTAX.encode())
+            stdin.seek(0)
+
+            result = ufmt_stdin(STDIN)
+            err = result.error
+            assert err is not None
+            assert isinstance(err, ParserSyntaxError)
+            self.assertTrue(err.message.startswith("parser error"))
+            stdout.seek(0)
+            self.assertEqual(b"", stdout.read())
+
     def test_ufmt_paths(self) -> None:
         with TemporaryDirectory() as td:
             tdp = Path(td)
